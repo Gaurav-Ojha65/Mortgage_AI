@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(cmd:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :8001)",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(findstr \":8000\")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(findstr \"800\")",
+      "Bash(python3:*)",
+      "Bash(curl -s http://localhost:8001/health)",
+      "Bash(npm install:*)",
+      "Bash(npm start:*)",
+      "Bash(grep -r \"\\\\\\\\\\\\\\\\u003e\\\\\\\\|\\\\\\\\\\\\\\\\u003c\" src/components/)",
+      "Bash(npx kill-port:*)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl:*)",
+      "Bash(lsof -t -i:8001)",
+      "Bash(tasklist)",
+      "Bash(rm -rf __pycache__)"
+    ]
+  }
+}
