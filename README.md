@@ -1,4 +1,4 @@
-# Mortgage AI Decision System
+<!-- # Mortgage AI Decision System
 
 AI-powered mortgage loan approval system with FastAPI backend, Dash dashboard, and XGBoost ML model. Uses Monte Carlo simulation for risk assessment and provides real-time loan decision analysis.
 
@@ -176,4 +176,220 @@ CREATE TABLE decisions (
     emi REAL NOT NULL,
     advice TEXT
 );
+``` -->
+
+
+# 🚀 Mortgage AI Decision System
+
+AI-powered mortgage loan approval system using **Machine Learning + Monte Carlo Simulation** for intelligent risk assessment and decision-making.
+
+---
+
+## 🔥 Features
+
+* 🤖 ML-based loan approval (XGBoost)
+* 📊 Monte Carlo simulation for risk analysis
+* ⚡ FastAPI backend (high-performance APIs)
+* 🌐 React frontend dashboard (modern UI)
+* 🧠 AI advisor integration (Ollama)
+* 📈 Real-time analytics & visualization
+* 🗄️ SQLite database for decision tracking
+
+---
+
+## 🧱 Tech Stack
+
+| Component         | Technology                  |
+| ----------------- | --------------------------- |
+| **Frontend**      | React + Tailwind + Plotly   |
+| **Backend API**   | FastAPI + Uvicorn           |
+| **ML Model**      | XGBoost                     |
+| **Database**      | SQLite                      |
+| **Validation**    | Pydantic                    |
+| **Visualization** | Plotly, Matplotlib, Seaborn |
+| **Language**      | Python 3.10+                |
+
+---
+
+## ⚙️ Installation
+
+```bash
+# Clone repo
+git clone https://github.com/YOUR_USERNAME/Mortgage_AI.git
+cd Mortgage_AI
 ```
+
+### Backend setup
+
+```bash
+pip install fastapi uvicorn sqlalchemy pydantic
+pip install scikit-learn xgboost joblib
+pip install matplotlib seaborn numpy
+```
+
+### Frontend setup
+
+```bash
+cd mortgage-frontend
+npm install
+```
+
+---
+
+## ▶️ How to Run
+
+### 1️⃣ Start Backend API
+
+```bash
+python api.py
+```
+
+📍 Runs on:
+http://localhost:8001
+
+📘 API Docs:
+http://localhost:8001/docs
+
+---
+
+### 2️⃣ Start Frontend (React)
+
+```bash
+cd mortgage-frontend
+npm start
+```
+
+🌐 Runs on:
+http://localhost:3000
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint   | Description              |
+| ------ | ---------- | ------------------------ |
+| `POST` | `/analyze` | Analyze loan application |
+| `GET`  | `/history` | Fetch recent decisions   |
+| `GET`  | `/compare` | Compare loan scenarios   |
+| `GET`  | `/health`  | API health check         |
+
+---
+
+## 📥 Example Request
+
+```bash
+curl -X POST http://localhost:8001/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "income": 50000,
+    "loan_amount": 200000,
+    "interest_rate": 8.5,
+    "loan_term": 5,
+    "credit_score": 650,
+    "existing_loans": 1
+  }'
+```
+
+---
+
+## 📤 Example Response
+
+```json
+{
+  "decision": "APPROVE",
+  "emi": 4103.31,
+  "risk_level": "LOW",
+  "default_probability": 0.08,
+  "approval_probability": 0.82,
+  "advice": "Application meets criteria",
+  "monte_carlo": {
+    "worst_case_emi": 4320.15,
+    "safe_income_threshold": 42500.0
+  }
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+Mortgage_AI/
+│
+├── api.py                  # FastAPI backend (port 8001)
+├── emi.py
+├── features.py
+├── model.py
+├── risk.py
+├── advisor.py
+├── monte_carlo.py
+├── evaluate.py
+├── best_model.pkl
+├── mortgage.db
+│
+├── mortgage-frontend/      # React frontend (port 3000)
+│
+└── design-system/
+```
+
+---
+
+## 📊 Model Evaluation
+
+```bash
+python evaluate.py
+```
+
+Generates:
+
+* confusion matrix
+* ROC curve
+* precision-recall curve
+* feature importance
+
+---
+
+## 🗄️ Database Schema
+
+```sql
+CREATE TABLE decisions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL,
+    income REAL,
+    loan_amount REAL,
+    credit_score INTEGER,
+    decision TEXT,
+    risk_level TEXT,
+    default_probability REAL,
+    emi REAL,
+    advice TEXT
+);
+```
+
+---
+
+## ⚠️ Notes
+
+* Old Dash dashboard (port 8050) is deprecated
+* Use React frontend (port 3000)
+* Ensure backend is running before frontend
+
+---
+
+## 💡 Future Improvements
+
+* 🔐 Authentication system
+* ☁️ Cloud deployment (AWS/Vercel)
+* 📊 Advanced analytics dashboard
+* 🤖 Better AI advisor integration
+
+---
+
+## 👨‍💻 Author
+
+Gaurav Ojha
+Engineering Student | AI/ML Developer
+
+---
+
+## ⭐ If you like this project, give it a star!
