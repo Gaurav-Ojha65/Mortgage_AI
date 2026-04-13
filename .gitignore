@@ -9,6 +9,9 @@ build/
 __pycache__/
 *.pyc
 
-# OS
-.DS_Store
-Thumbs.db
+# ML artifacts
+*.pkl
+*.csv
+*.db
+*.png
+*.json
