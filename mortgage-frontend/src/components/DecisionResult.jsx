@@ -229,19 +229,31 @@ const DecisionResult = ({ decision }) => {
 
       {/* AI Advice Section */}
       {decision.advice && (
-        <div className="glass-card rounded-xl p-6 border-l-4 border-l-cta-500">
+        <div className={`glass-card rounded-xl p-6 border-l-4 ${decision.ai_advice ? 'border-l-cta-500' : 'border-l-slate-500'}`}>
           <div className="flex items-start space-x-4">
-            <div className="p-3 rounded-xl bg-cta-500/10 shrink-0">
-              <svg className="w-6 h-6 text-cta-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={`p-3 rounded-xl shrink-0 ${decision.ai_advice ? 'bg-cta-500/10' : 'bg-slate-500/10'}`}>
+              <svg className={`w-6 h-6 ${decision.ai_advice ? 'text-cta-400' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
-                <h3 className="text-lg font-semibold text-white">AI Recommendation</h3>
-                <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-cta-500/20 text-cta-400 border border-cta-500/30">
-                  Claude AI
-                </span>
+                <h3 className="text-lg font-semibold text-white">{decision.ai_advice ? 'AI Recommendation' : 'Recommendation'}</h3>
+                {decision.ai_advice ? (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-cta-500/20 text-cta-400 border border-cta-500/30 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M9 12h.01M15 12h.01M12 12h.01" />
+                    </svg>
+                    AI advisor active
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-mono bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    Basic mode — AI advisor offline
+                  </span>
+                )}
               </div>
               <div className="text-slate-300 leading-relaxed space-y-2">
                 {decision.advice.split(';').map((item, idx) => (

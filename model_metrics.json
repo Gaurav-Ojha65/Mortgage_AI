@@ -1,78 +1,16 @@
 {
-  "test_set_metrics": {
-    "accuracy": 0.98,
-    "precision": 0.9815,
-    "recall": 0.9815,
-    "f1_score": 0.9815,
-    "roc_auc": 0.9897
-  },
-  "cross_validation": {
-    "accuracy": {
-      "mean": 0.854,
-      "std": 0.028
-    },
-    "precision": {
-      "mean": 0.8495,
-      "std": 0.0385
-    },
-    "recall": {
-      "mean": 0.8889,
-      "std": 0.0166
-    },
-    "f1": {
-      "mean": 0.8684,
-      "std": 0.0238
-    }
-  },
-  "model_card": {
-    "model_type": "RandomForestClassifier",
-    "training_samples": 100,
-    "features": [
-      "income",
-      "loan_amount",
-      "credit_score",
-      "existing_loans",
-      "loan_term",
-      "debt_to_income_ratio",
-      "emi_to_income_ratio",
-      "credit_utilization_score"
-    ],
-    "performance": {
-      "accuracy": 0.98,
-      "precision": 0.9815,
-      "recall": 0.9815,
-      "f1_score": 0.9815,
-      "roc_auc": 0.9897
-    },
-    "cross_validation": {
-      "accuracy": {
-        "mean": 0.854,
-        "std": 0.028
-      },
-      "precision": {
-        "mean": 0.8495,
-        "std": 0.0385
-      },
-      "recall": {
-        "mean": 0.8889,
-        "std": 0.0166
-      },
-      "f1": {
-        "mean": 0.8684,
-        "std": 0.0238
-      }
-    },
-    "limitations": [
-      "Synthetic training data",
-      "No macroeconomic factors",
-      "No co-applicant consideration",
-      "Static thresholds"
-    ],
-    "use_cases": [
-      "Pre-screening",
-      "Risk stratification",
-      "Decision benchmarking",
-      "Borderline case identification"
-    ]
-  }
+  "model_type": "RandomForestClassifier",
+  "features": [
+    "income",
+    "loan_amount",
+    "credit_score",
+    "existing_loans",
+    "loan_term",
+    "debt_to_income_ratio",
+    "emi_to_income_ratio",
+    "credit_utilization_score"
+  ],
+  "n_features": 8,
+  "train_samples": 396,
+  "test_samples": 99
 }

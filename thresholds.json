@@ -1,0 +1,10 @@
+{
+  "t1": 0.05,
+  "t2": 0.2,
+  "tier_names": {
+    "AUTO-APPROVE": "risk < 0.0500",
+    "MANUAL-REVIEW": "0.0500 <= risk < 0.2000",
+    "REJECT": "risk >= 0.2000"
+  },
+  "business_cost": 81363
+}

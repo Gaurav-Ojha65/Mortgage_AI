@@ -1,6 +1,17 @@
-<!-- # Mortgage AI Decision System
+# Mortgage AI Decision System
 
-AI-powered mortgage loan approval system with FastAPI backend, Dash dashboard, and XGBoost ML model. Uses Monte Carlo simulation for risk assessment and provides real-time loan decision analysis.
+Production-grade mortgage loan approval system with ML ensemble, OCR document extraction, fairness auditing, and regulatory compliance. Built with FastAPI, React, XGBoost/LightGBM, and PostgreSQL.
+
+---
+
+## Features
+
+### Core Capabilities
+- **ML Ensemble**: XGBoost + LightGBM with SHAP explainability
+- **Document OCR**: Extract income/employment data from pay stubs, bank statements, tax returns
+- **Fairness Audit**: Bias detection across age, income, home ownership (ECOA/Fair Housing compliance)
+- **Real-time Decisions**: WebSocket live feed, Redis caching, rate limiting
+- **Production Ready**: Docker Compose, Prometheus metrics, Grafana dashboards
 
 ---
 
@@ -9,32 +20,38 @@ AI-powered mortgage loan approval system with FastAPI backend, Dash dashboard, a
 | Component | Technology |
 |---|---|
 | **Backend API** | FastAPI + Uvicorn |
-| **Frontend Dashboard** | Dash + Plotly |
-| **ML Model** | XGBoost |
-| **Database** | SQLite |
-| **Validation** | Pydantic |
-| **Visualizations** | Matplotlib, Seaborn, Plotly |
-| **Language** | Python 3.10+ |
+| **Frontend** | React + IBM Plex Mono |
+| **ML Models** | XGBoost, LightGBM, SHAP |
+| **Database** | PostgreSQL (SQLite fallback) |
+| **Cache** | Redis |
+| **OCR** | pdfplumber, pytesseract, Tesseract |
+| **Fairness** | fairlearn |
+| **Monitoring** | Prometheus + Grafana |
+| **Container** | Docker Compose |
 
 ---
 
 ## Installation
 
+### Quick Start (Docker)
 ```bash
-# Clone or navigate to project directory
+docker-compose up -d
+```
+
+### Manual Installation
+```bash
 cd Mortgage_AI
 
-# Install backend dependencies
-pip install fastapi uvicorn sqlalchemy pydantic
+# Install all dependencies
+pip install -r requirements.txt
 
-# Install ML dependencies
-pip install scikit-learn xgboost joblib
+# For OCR functionality (Linux/Mac)
+sudo apt-get install tesseract-ocr poppler-utils  # Linux
+brew install tesseract poppler                    # Mac
 
-# Install dashboard dependencies
-pip install dash plotly dash-bootstrap-components requests pandas
-
-# Install evaluation dependencies
-pip install matplotlib seaborn numpy
+# For Kaggle dataset download
+mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
 ```
 
 ---
@@ -42,12 +59,29 @@ pip install matplotlib seaborn numpy
 ## How to Run
 
 ### 1. Start the API server
-
 ```bash
-python api.py
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+API runs on **http://localhost:8000**  
+Interactive docs: http://localhost:8000/docs
+
+### 2. Start the Frontend
+```bash
+cd mortgage-frontend
+npm install
+npm start
+```
+Frontend runs on **http://localhost:3000**
+
+### 3. Run Data Pipeline (first time setup)
+```bash
+python data_pipeline.py
 ```
 
-API runs on **http://localhost:8001**
+### 4. Run Fairness Audit
+```bash
+python fairness_audit.py --model models/xgboost_model.joblib --data data/test.csv
+```
 
 Interactive docs: http://localhost:8001/docs
 

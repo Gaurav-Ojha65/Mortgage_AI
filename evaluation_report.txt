@@ -1,0 +1,75 @@
+============================================================
+  EVALUATION REPORT -- Credit Risk Pipeline v2
+============================================================
+
+  MODEL: LightGBM + SMOTE + Isotonic Calibration
+  THRESHOLD: 0.1438 (best F1)
+  DATE: 2026-04-15
+
+METRICS
+------------------------------------------------------------
+  ROC-AUC:   0.7619  (target >= 0.75)  [PASS]
+  PR-AUC:    0.2455
+  Precision: 0.2430  (target >= 0.30)  [FAIL]
+  Recall:    0.4342  (target >= 0.60)  [LOW]
+  F1-score:  0.3116
+  Accuracy:  0.8451
+  Business Cost: 20,762
+
+CONFUSION MATRIX (Test Set, N=61,503)
+------------------------------------------------------------
+                  Predicted
+              NoDefault   Default
+  Actual 0   49,821     6,717  (FP = false rejections)
+       1     2,809     2,156  (TP = caught defaults)
+  FN = 2,809 missed defaults | FP = 6,717 false rejections
+
+PRECISION-RECALL TRADEOFF
+------------------------------------------------------------
+  Threshold  Precision  Recall   F1      Business Cost
+  -------   ---------  ------   -----   ------------
+  0.050     0.1294     0.8307  0.2240  127,781
+  0.100     0.1853     0.5881  0.2818  92,264
+  0.144     0.2271     0.4368  0.2989  85,441  <-- BEST F1
+  0.200     0.2769     0.2933  0.2849  85,385
+  0.250     0.3333     0.1768  0.2310  88,768  [Prec>=0.30 borderline]
+  0.300     0.3917     0.0992  0.1583  92,509
+
+  NOTE: Rec>=0.60 + Prec>=0.30 NOT jointly achievable on this data.
+  The 8.07% default rate fundamentally limits recall at high precision.
+
+THRESHOLD SELECTION RATIONALE
+------------------------------------------------------------
+  At t=0.144 (best F1):   Prec=0.227  Rec=0.437  F1=0.299  Cost=85,441
+  At t=0.100 (recall-foc): Prec=0.185  Rec=0.588  F1=0.282  Cost=92,264
+  At t=0.250 (prec-foc):   Prec=0.333  Rec=0.177  F1=0.231  Cost=88,768
+
+  Final selected: t=0.144 (best F1 balance)
+  Business cost at t=0.144 on test: 20,762
+
+SHAP TOP 15 DRIVERS (mean |SHAP|)
+------------------------------------------------------------
+   1. has_realty                  0.7307
+   2. bureau_total_req            0.6978
+   3. documents_provided           0.6246
+   4. REGION_RATING_CLIENT_W_CITY 0.5282
+   5. OCCUPATION_TYPE_ORD         0.5261
+   6. HOUR_APPR_PROCESS_START     0.4907
+   7. NAME_INCOME_TYPE            0.4714
+   8. has_car                     0.4413
+   9. ext_mean                    0.4314
+  10. region_mismatch             0.4236
+  11. ext_weighted                0.3856
+  12. annuity_per_credit         0.2217
+  13. credit_term_months         0.1998
+  14. car_age_flag                0.1891
+  15. ext_2_3                     0.1580
+
+  PROXY BIAS CHECK: PASS
+  No gender/marital/family proxy in top 15 SHAP drivers.
+  NAME_FAMILY_STATUS excluded from model features.
+
+FEATURE DROPS
+------------------------------------------------------------
+  CODE_GENDER: EXCLUDED (not used in model)
+  NAME_FAMILY_STATUS: EXCLUDED (proxy bias)

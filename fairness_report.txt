@@ -1,0 +1,23 @@
+============================================================
+  FAIRNESS REPORT — Credit Risk Pipeline v2
+============================================================
+
+  Constraint: No group deviation > 20%, DI >= 0.80
+
+  Age Group:
+    DI Ratio: 0.838  Max Dev: 16.2%  [PASS]
+
+  Education:
+    DI Ratio: 0.954  Max Dev: 6.2%  [PASS]
+
+  Housing Type:
+    DI Ratio: 0.874  Max Dev: 12.6%  [PASS]
+
+  Income Quintile:
+    DI Ratio: 0.977  Max Dev: 4.4%  [PASS]
+
+  Gender (audit):
+    DI Ratio: 0.957  Max Dev: 4.3%  [PASS]
+
+
+  Overall: ALL PASS

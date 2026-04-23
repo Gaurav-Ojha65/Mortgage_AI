@@ -42,17 +42,17 @@ const History = () => {
     }).format(date);
   };
 
-  const filteredHistory = history.filter(item => {
+  const filteredHistory = Array.isArray(history) ? history.filter(item => {
     if (filter === 'ALL') return true;
     return item.decision === filter;
-  });
+  }) : [];
 
   const stats = {
-    total: history.length,
-    approved: history.filter(h => h.decision === 'APPROVE').length,
-    rejected: history.filter(h => h.decision === 'REJECT').length,
-    conditional: history.filter(h => h.decision === 'CONDITIONAL').length,
-    avgLoanAmount: history.length > 0
+    total: Array.isArray(history) ? history.length : 0,
+    approved: Array.isArray(history) ? history.filter(h => h.decision === 'APPROVE').length : 0,
+    rejected: Array.isArray(history) ? history.filter(h => h.decision === 'REJECT').length : 0,
+    conditional: Array.isArray(history) ? history.filter(h => h.decision === 'CONDITIONAL').length : 0,
+    avgLoanAmount: Array.isArray(history) && history.length > 0
       ? history.reduce((sum, h) => sum + (h.loan_amount || 0), 0) / history.length
       : 0
   };
@@ -175,7 +175,7 @@ const History = () => {
                   </td>
                 </tr>
               ) : (
-                filteredHistory.map((item, idx) => (
+                Array.isArray(filteredHistory) && filteredHistory.map((item, idx) => (
                   <tr key={idx} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 text-slate-300 text-sm">
                       {formatDate(item.timestamp)}

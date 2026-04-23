@@ -1,0 +1,89 @@
+# Core ML & Data
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+xgboost>=2.0.0
+lightgbm>=4.1.0
+tensorflow>=2.13.0
+shap>=0.42.0
+
+# Model Management & Experiment Tracking
+mlflow>=2.8.0
+optuna>=3.4.0
+
+# Data Processing & Imbalance
+imbalanced-learn>=0.11.0
+feature-engine>=1.6.0
+
+# OCR & Document Processing
+pdfplumber>=0.10.0
+pytesseract>=0.3.10
+pillow>=10.0.0
+pdf2image>=1.16.3
+
+# API & Backend
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.6
+
+# Caching & Rate Limiting
+redis>=5.0.0
+fastapi-limiter>=0.1.6
+fastapi-cache2>=0.2.0
+
+# Database
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+psycopg2-binary>=2.9.9
+aiosqlite>=0.19.0
+
+# WebSocket & Async
+websockets>=12.0
+python-socketio>=5.9.0
+
+# Monitoring & Observability
+prometheus-client>=0.19.0
+opentelemetry-api>=1.21.0
+opentelemetry-sdk>=1.21.0
+opentelemetry-instrumentation-fastapi>=0.42b0
+
+# Drift Detection
+evidently>=0.4.0
+
+# Fairness & Bias Detection
+fairlearn>=0.10.0
+
+# Kaggle Dataset Download
+kaggle>=1.6.0
+opendatasets>=0.1.0
+
+# Utilities
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+httpx>=0.25.0
+requests>=2.31.0
+joblib>=1.3.0
+tqdm>=4.66.0
+
+# PDF Generation
+reportlab>=4.0.0
+weasyprint>=60.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+locust>=2.18.0
+locust-plugins>=4.4.0
+
+# Code Quality
+black>=23.11.0
+flake8>=6.1.0
+mypy>=1.7.0
+
+# Jupyter (for development)
+jupyter>=1.0.0
+matplotlib>=3.8.0
+seaborn>=0.13.0

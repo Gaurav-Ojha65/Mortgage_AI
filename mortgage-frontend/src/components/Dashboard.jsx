@@ -16,7 +16,8 @@ const Dashboard = ({ lastDecision }) => {
           healthCheck(),
           getHistory(5)
         ]);
-        setSystemStatus(status);
+        // API returns {success, data: {...}} - extract the data
+        setSystemStatus(status.data || status);
         setRecentDecisions(history);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
@@ -39,20 +40,22 @@ const Dashboard = ({ lastDecision }) => {
   };
 
   const stats = {
-    totalProcessed: recentDecisions.length,
-    approvalRate: recentDecisions.length > 0
+    totalProcessed: Array.isArray(recentDecisions) ? recentDecisions.length : 0,
+    approvalRate: Array.isArray(recentDecisions) && recentDecisions.length > 0
       ? ((recentDecisions.filter(d => d.decision === 'APPROVE').length / recentDecisions.length) * 100).toFixed(1)
       : 0,
-    avgLoanAmount: recentDecisions.length > 0
+    avgLoanAmount: Array.isArray(recentDecisions) && recentDecisions.length > 0
       ? recentDecisions.reduce((sum, d) => sum + (d.loan_amount || 0), 0) / recentDecisions.length
       : 0,
-    totalVolume: recentDecisions.reduce((sum, d) => sum + (d.loan_amount || 0), 0)
+    totalVolume: Array.isArray(recentDecisions)
+      ? recentDecisions.reduce((sum, d) => sum + (d.loan_amount || 0), 0)
+      : 0
   };
 
   const trustBadges = [
-    { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', label: 'SOC 2 Certified' },
+    { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', label: 'Bank-Grade Security' },
     { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', label: '256-bit Encryption' },
-    { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', label: 'GDPR Compliant' },
+    { icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01', label: 'NMLS Compliant' },
     { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: '99.9% Uptime' }
   ];
 
@@ -243,7 +246,7 @@ const Dashboard = ({ lastDecision }) => {
                   </td>
                 </tr>
               ) : (
-                recentDecisions.map((decision, idx) => (
+                Array.isArray(recentDecisions) && recentDecisions.map((decision, idx) => (
                   <tr key={idx} className="hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4 text-slate-300 text-sm">
                       {new Date(decision.timestamp).toLocaleTimeString()}

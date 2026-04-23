@@ -8,6 +8,8 @@ import LoanForm from './components/LoanForm';
 import History from './components/History';
 import Compare from './components/Compare';
 import MonteCarlo3D from './components/MonteCarlo3D';
+import ModelComparison from './components/ModelComparison';
+import DecisionExplainer from './components/DecisionExplainer';
 
 function App() {
   const [lastDecision, setLastDecision] = useState(null);
@@ -40,6 +42,8 @@ function App() {
             <Route path="/apply" element={<LoanForm onDecision={setLastDecision} />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/monte-carlo" element={<MonteCarlo3D />} />
+            <Route path="/models" element={<ModelComparison />} />
+            <Route path="/explain" element={<DecisionExplainer />} />
             <Route path="/history" element={<History />} />
           </Routes>
         </main>

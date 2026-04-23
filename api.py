@@ -8,18 +8,130 @@ from datetime import datetime
 from typing import Optional, List
 from contextlib import asynccontextmanager
 import sqlite3
+import logging
+import json
+import sys
+from logging.handlers import RotatingFileHandler
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 import joblib
+import uuid
+import signal
+import asyncio
 
 from features import engineer_features
 from emi import calculate_emi
 from risk import calculate_risk
 from monte_carlo import simulate as mc_simulate
+from model_router import router as model_router
+from shap_router import shap_router
+
+
+# =============================================================================
+# Structured Logging Setup
+# =============================================================================
+
+class JSONFormatter(logging.Formatter):
+    """JSON formatter for structured logging."""
+    def format(self, record):
+        log_obj = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        if hasattr(record, "request_id"):
+            log_obj["request_id"] = record.request_id
+        if record.exc_info:
+            log_obj["exception"] = self.formatException(record.exc_info)
+        return json.dumps(log_obj)
+
+
+def setup_logging():
+    """Configure structured JSON logging."""
+    logger = logging.getLogger("mortgage_api")
+    logger.setLevel(logging.INFO)
+
+    # Console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(JSONFormatter())
+    logger.addHandler(console_handler)
+
+    # Rotating file handler
+    file_handler = RotatingFileHandler(
+        "mortgage_api.log",
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=5
+    )
+    file_handler.setFormatter(JSONFormatter())
+    logger.addHandler(file_handler)
+
+    return logger
+
+
+logger = setup_logging()
+
+
+# =============================================================================
+# Response Standardization
+# =============================================================================
+
+def create_response(data=None, success=True, error=None, request_id=None):
+    """Create standardized API response envelope."""
+    response = {
+        "success": success,
+        "request_id": request_id or str(uuid.uuid4())[:8],
+        "timestamp": datetime.now().isoformat()
+    }
+    if data is not None:
+        response["data"] = data
+    if error is not None:
+        response["error"] = error
+    return response
+
+
+# =============================================================================
+# Input Sanitization Utilities
+# =============================================================================
+
+def sanitize_string(value: str) -> str:
+    """Sanitize string input - strip whitespace and basic injection protection."""
+    if not isinstance(value, str):
+        return value
+    # Strip whitespace
+    value = value.strip()
+    # Remove null bytes
+    value = value.replace('\x00', '')
+    # Basic SQL injection pattern detection (for logging, not blocking)
+    suspicious = ['--', '/*', '*/', ';', 'DROP', 'SELECT', 'INSERT', 'DELETE', 'UPDATE']
+    for pattern in suspicious:
+        if pattern.upper() in value.upper():
+            logger.warning(f"Suspicious pattern detected in input: {pattern}")
+    return value
+
+
+def validate_numeric_range(value, min_val, max_val, name):
+    """Validate numeric value is within safe range."""
+    if value is None:
+        return None
+    try:
+        num = float(value)
+        if num < min_val or num > max_val:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{name} must be between {min_val} and {max_val}"
+            )
+        return num
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"{name} must be a valid number"
+        )
 
 
 # =============================================================================
@@ -120,6 +232,40 @@ def get_history(limit: int = 20) -> List[dict]:
 # =============================================================================
 
 global_model = None
+startup_time = datetime.now()
+prediction_count = 0
+
+APP_VERSION = "1.0.0"
+
+# Error tracking (last 100 errors)
+error_log = []
+MAX_ERROR_LOG = 100
+
+
+def log_error(error_data: dict):
+    """Store error in memory log (last 100)."""
+    error_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "error": error_data
+    }
+    error_log.insert(0, error_entry)
+    if len(error_log) > MAX_ERROR_LOG:
+        error_log.pop()
+
+
+def get_uptime_seconds():
+    """Get application uptime in seconds."""
+    return int((datetime.now() - startup_time).total_seconds())
+
+
+def get_memory_usage():
+    """Get current memory usage in MB."""
+    try:
+        import psutil
+        process = psutil.Process()
+        return process.memory_info().rss / 1024 / 1024
+    except ImportError:
+        return None
 
 
 # =============================================================================
@@ -152,6 +298,24 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Request size limit middleware
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    """Limit request body size to 1MB."""
+    max_size = 1 * 1024 * 1024  # 1MB
+    body = await request.body()
+    if len(body) > max_size:
+        return JSONResponse(
+            status_code=413,
+            content={"detail": "Request body too large", "type": "payload_too_large"}
+        )
+    # Recreate request with body for downstream
+    async def receive():
+        return {"type": "http.request", "body": body}
+    request._receive = receive
+    return await call_next(request)
+
+
 # CORS middleware for React frontend
 app.add_middleware(
     CORSMiddleware,
@@ -161,6 +325,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include model comparison router
+app.include_router(model_router, prefix="/api")
+app.include_router(shap_router, prefix="/api")
+
 
 # =============================================================================
 # Health Check
@@ -168,7 +336,7 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint."""
+    """Health check endpoint with system metrics."""
     db_ok = False
     try:
         conn = sqlite3.connect(DATABASE_PATH)
@@ -178,11 +346,20 @@ def health_check():
     except Exception:
         pass
 
-    return {
+    response = {
         "status": "ok",
+        "version": APP_VERSION,
+        "uptime_seconds": get_uptime_seconds(),
         "models_loaded": global_model is not None,
-        "db_connected": db_ok
+        "db_connected": db_ok,
+        "predictions_served": prediction_count
     }
+
+    memory_mb = get_memory_usage()
+    if memory_mb:
+        response["memory_usage_mb"] = round(memory_mb, 2)
+
+    return create_response(data=response)
 
 
 # =============================================================================
@@ -191,6 +368,7 @@ def health_check():
 
 @app.post("/analyze")
 def analyze_application(application: LoanApplication):
+    global prediction_count
     """
     Analyze a loan application and return decision with full metrics.
 
@@ -202,6 +380,8 @@ def analyze_application(application: LoanApplication):
     5. simulate() - Monte Carlo default probability
     6. Return comprehensive decision
     """
+    logger.info(f"Analyzing application: income={application.income}, loan={application.loan_amount}")
+
     try:
         # Build input dict
         loan_data = application.model_dump()
@@ -277,6 +457,7 @@ def analyze_application(application: LoanApplication):
             "default_probability": mc_results["default_probability"],
             "approval_probability": approval_prob,
             "advice": "; ".join(advice),
+            "ai_advice": False,
             "feature_values": {
                 "debt_to_income_ratio": enriched["debt_to_income_ratio"],
                 "emi_to_income_ratio": enriched["emi_to_income_ratio"],
@@ -304,9 +485,12 @@ def analyze_application(application: LoanApplication):
             "advice": response["advice"]
         })
 
-        return response
+        logger.info(f"Analysis complete: decision={decision}, risk={risk_level}")
+        prediction_count += 1
+        return create_response(data=response)
 
     except Exception as e:
+        logger.error(f"Analysis failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
@@ -319,9 +503,35 @@ def get_decisions_history(limit: int = Query(default=20, le=100, ge=1)):
     """Get last N decisions from database."""
     try:
         history = get_history(limit)
-        return history
+        return create_response(data=history)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve history: {str(e)}")
+
+
+# =============================================================================
+# Error Monitoring Endpoint
+# =============================================================================
+
+class ErrorReport(BaseModel):
+    """Client-side error report."""
+    message: str = Field(..., max_length=1000)
+    stack: Optional[str] = Field(None, max_length=5000)
+    url: Optional[str] = Field(None, max_length=500)
+    user_agent: Optional[str] = Field(None, max_length=500)
+
+
+@app.post("/errors")
+def report_error(report: ErrorReport):
+    """Receive client-side error reports."""
+    log_error(report.model_dump(exclude_none=True))
+    logger.warning(f"Client error reported: {report.message[:200]}")
+    return create_response(data={"status": "logged"})
+
+
+@app.get("/errors")
+def get_errors(limit: int = Query(default=20, le=100, ge=1)):
+    """Get recent errors (for admin/monitoring)."""
+    return create_response(data=error_log[:limit])
 
 
 # =============================================================================
@@ -386,11 +596,11 @@ def compare_loan_amounts(
                 "worst_case_emi": mc["worst_case_emi"]
             }
 
-        return {
+        return create_response(data={
             "income": income,
             "credit_score": credit_score,
             "comparison": results
-        }
+        })
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
@@ -402,14 +612,48 @@ def compare_loan_amounts(
 
 @app.exception_handler(HTTPException)
 def http_exception_handler(request, exc):
-    return {"detail": exc.detail}
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "type": "http_error"}
+    )
+
+
+@app.exception_handler(RequestValidationError)
+def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        field = ".".join(str(loc) for loc in error["loc"] if loc != "body")
+        errors.append({
+            "field": field,
+            "message": error["msg"],
+            "type": error["type"]
+        })
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": "Validation failed",
+            "type": "validation_error",
+            "errors": errors
+        }
+    )
+
+
+@app.exception_handler(sqlite3.Error)
+def sqlite_exception_handler(request: Request, exc: sqlite3.Error):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Database error occurred",
+            "type": "database_error"
+        }
+    )
 
 
 @app.exception_handler(Exception)
 def general_exception_handler(request, exc):
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"}
+        content={"detail": "Internal server error", "type": "internal_error"}
     )
 
 

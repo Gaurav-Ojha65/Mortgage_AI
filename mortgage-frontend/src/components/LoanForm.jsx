@@ -1,17 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { analyzeLoan } from '../utils/api';
 import DecisionResult from './DecisionResult';
 
+const STORAGE_KEY = 'mortgage_loan_form_data';
+
 const LoanForm = ({ onDecision }) => {
-  const [formData, setFormData] = useState({
-    income: '',
-    loan_amount: '',
-    interest_rate: '8.5',
-    loan_term: '5',
-    credit_score: '',
-    existing_loans: '0'
+  const [formData, setFormData] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {
+      income: '',
+      loan_amount: '',
+      interest_rate: '8.5',
+      loan_term: '5',
+      credit_score: '',
+      existing_loans: '0'
+    };
   });
+
+  // Save to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
+
+  const clearSavedData = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setFormData({
+      income: '',
+      loan_amount: '',
+      interest_rate: '8.5',
+      loan_term: '5',
+      credit_score: '',
+      existing_loans: '0'
+    });
+  };
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [errors, setErrors] = useState({});
@@ -256,6 +278,17 @@ const LoanForm = ({ onDecision }) => {
                 </>
               )}
             </button>
+
+            {/* Clear saved data */}
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={clearSavedData}
+                className="text-sm text-slate-500 hover:text-slate-400 underline transition-colors"
+              >
+                Clear saved data
+              </button>
+            </div>
           </form>
 
           {/* Quick Info */}

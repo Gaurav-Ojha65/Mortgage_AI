@@ -3,6 +3,15 @@ import { toast } from 'react-toastify';
 import { compareLoans } from '../utils/api';
 import GaugeChart from './GaugeChart';
 
+const DEFAULT_ITEM = {
+  loan_amount: 0,
+  decision: 'pending',
+  emi: 0,
+  risk_level: 'unknown',
+  default_probability: 0,
+  worst_case_emi: 0
+};
+
 const Compare = () => {
   const [formData, setFormData] = useState({
     income: '',
@@ -63,9 +72,9 @@ const Compare = () => {
 
   const getDecisionConfig = (decision) => {
     switch (decision) {
-      case 'APPROVE':
+      case 'approve':
         return { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', badge: 'badge-success' };
-      case 'REJECT':
+      case 'reject':
         return { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/30', badge: 'badge-danger' };
       default:
         return { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', badge: 'badge-warning' };
@@ -96,6 +105,8 @@ const Compare = () => {
       description: 'Higher loan amount with increased risk'
     }
   };
+
+  const hasResults = results && results.comparison;
 
   return (
     <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
@@ -198,7 +209,7 @@ const Compare = () => {
       </div>
 
       {/* Results */}
-      {results && (
+      {hasResults ? (
         <div className="space-y-8">
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 section-divider" />
@@ -209,9 +220,10 @@ const Compare = () => {
           {/* Scenarios Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {['low', 'medium', 'high'].map((scenario, idx) => {
-              const data = results.comparison[scenario];
+              const rawData = results.comparison?.[scenario];
+              const data = { ...DEFAULT_ITEM, ...rawData };
               const config = getDecisionConfig(data.decision);
-              const scenarioInfo = scenarioConfig[scenario];
+              const scenarioInfo = scenarioConfig[scenario] || scenarioConfig.low;
 
               return (
                 <div
@@ -261,8 +273,8 @@ const Compare = () => {
                     <div className="flex justify-between items-center py-3 border-b border-white/5">
                       <span className="text-slate-400 text-sm">Risk Level</span>
                       <span className={`font-medium ${
-                        data.risk_level === 'LOW' ? 'text-emerald-400' :
-                        data.risk_level === 'HIGH' ? 'text-red-400' : 'text-amber-400'
+                        data.risk_level === 'low' ? 'text-emerald-400' :
+                        data.risk_level === 'high' ? 'text-red-400' : 'text-amber-400'
                       }`}>
                         {data.risk_level}
                       </span>
@@ -310,19 +322,19 @@ const Compare = () => {
               <div className="flex-1">
                 <h3 className="text-xl font-semibold text-white mb-4">AI Recommendation</h3>
                 <div className="text-slate-300 leading-relaxed space-y-3">
-                  <p>Based on your financial profile with a credit score of <strong className="text-white">{results.credit_score}</strong> and monthly income of <strong className="text-white">{formatCurrency(results.income)}</strong>:</p>
+                  <p>Based on your financial profile with a credit score of <strong className="text-white">{results.credit_score || 0}</strong> and monthly income of <strong className="text-white">{formatCurrency(results.income)}</strong>:</p>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                      <span>The <span className="text-emerald-400 font-medium">Conservative</span> option ({formatCurrency(results.comparison.low.loan_amount)}) carries the lowest risk with a {((results.comparison.low.default_probability || 0) * 100).toFixed(1)}% default probability.</span>
+                      <span>The <span className="text-emerald-400 font-medium">Conservative</span> option ({formatCurrency(results.comparison?.low?.loan_amount || 0)}) carries the lowest risk with a {((results.comparison?.low?.default_probability || 0) * 100).toFixed(1)}% default probability.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 shrink-0" />
-                      <span>The <span className="text-purple-400 font-medium">Standard</span> option ({formatCurrency(results.comparison.medium.loan_amount)}) represents a balanced approach with manageable risk levels.</span>
+                      <span>The <span className="text-purple-400 font-medium">Standard</span> option ({formatCurrency(results.comparison?.medium?.loan_amount || 0)}) represents a balanced approach with manageable risk levels.</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
-                      <span>The <span className="text-amber-400 font-medium">Aggressive</span> option ({formatCurrency(results.comparison.high.loan_amount)}) may strain your finances with a {((results.comparison.high.default_probability || 0) * 100).toFixed(1)}% default probability.</span>
+                      <span>The <span className="text-amber-400 font-medium">Aggressive</span> option ({formatCurrency(results.comparison?.high?.loan_amount || 0)}) may strain your finances with a {((results.comparison?.high?.default_probability || 0) * 100).toFixed(1)}% default probability.</span>
                     </li>
                   </ul>
                   <div className="mt-4 p-4 bg-amber-500/10 rounded-xl border border-amber-500/20">
@@ -333,7 +345,7 @@ const Compare = () => {
                       <span className="text-amber-400 font-semibold">Final Recommendation</span>
                     </div>
                     <p className="text-slate-300 text-sm">
-                      Consider the {results.comparison.medium.decision === 'APPROVE' ? 'Standard' : 'Conservative'} option
+                      Consider the {results.comparison?.medium?.decision === 'approve' ? 'Standard' : 'Conservative'} option
                       for optimal balance between loan amount and financial security.
                     </p>
                   </div>
@@ -342,6 +354,8 @@ const Compare = () => {
             </div>
           </div>
         </div>
+      ) : (
+        <p className="text-center text-slate-500">No comparison data</p>
       )}
     </div>
   );
