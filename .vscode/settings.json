@@ -1,0 +1,13 @@
+{
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/mortgage-frontend/build",
+  "liveServer.settings.CustomBrowser": "chrome",
+  "liveServer.settings.NoBrowser": false,
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "**/*.py",
+    "**/*.pkl",
+    "**/*.joblib",
+    "node_modules/**"
+  ]
+}

@@ -112,8 +112,16 @@ const Navigation = () => {
             ))}
           </div>
 
-          {/* Status Indicators */}
+          {/* Status Indicators & CTA */}
           <div className="hidden md:flex items-center space-x-3">
+            {/* Sign Up CTA */}
+            <Link
+              to="/signup"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 text-slate-900 font-semibold text-sm hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-200 cursor-pointer"
+            >
+              Get Started
+            </Link>
+
             {/* Bank-grade security badge */}
             <div className="trust-badge trust-badge-pulse">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

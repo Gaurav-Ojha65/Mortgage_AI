@@ -23,7 +23,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTEN
 from api.auth import (
     Token, authenticate_user, create_access_token, create_refresh_token,
     get_current_user, get_current_active_user, require_admin, require_analyst,
-    audit_logger, User
+    require_auditor, audit_logger, User
 )
 
 # Import routers
