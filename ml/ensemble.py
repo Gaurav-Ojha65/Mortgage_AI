@@ -219,6 +219,29 @@ class MortgageEnsembleModel(BaseEstimator, ClassifierMixin):
 
         return explanations
 
+    def get_individual_predictions(
+        self, X: np.ndarray
+    ) -> Dict[str, np.ndarray]:
+        """
+        Get predictions from each individual model in the ensemble.
+
+        Args:
+            X: Feature matrix
+
+        Returns:
+            Dictionary with predictions from XGBoost, LightGBM, and ensemble
+        """
+        if not self.is_fitted:
+            raise ValueError("Model not fitted. Call fit() first.")
+
+        Xs = self.scaler.transform(X)
+
+        return {
+            "xgb": self.models["xgb"].predict_proba(Xs)[:, 1],
+            "lgb": self.models["lgb"].predict_proba(Xs)[:, 1],
+            "ensemble": self.predict_proba(Xs)[:, 1],
+        }
+
     def evaluate(self, X: np.ndarray, y: np.ndarray) -> Dict[str, float]:
         """Comprehensive model evaluation."""
         p = self.predict(X)
