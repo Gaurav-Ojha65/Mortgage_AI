@@ -1,429 +1,149 @@
 # Mortgage AI Decision System
 
-Production-grade mortgage loan approval system with ML ensemble, OCR document extraction, fairness auditing, and regulatory compliance. Built with FastAPI, React, XGBoost/LightGBM, and PostgreSQL.
+A full-stack mortgage risk assessment project combining machine learning, explainability, fairness auditing, document processing, a FastAPI backend, React UI, containerization, testing, and observability.
 
----
+> **Portfolio note:** This repository contains multiple modeling paths. The simpler `model.py` baseline uses Logistic Regression, Random Forest, and XGBoost on a synthetic dataset, while `ml/ensemble.py` contains the XGBoost + LightGBM + neural-network stacking implementation used for the advanced ensemble workflow. Performance claims should be taken from reproducible evaluation artifacts rather than README marketing numbers.
 
-## Features
+## Why this project?
 
-### Core Capabilities
-- **ML Ensemble**: XGBoost + LightGBM with SHAP explainability
-- **Document OCR**: Extract income/employment data from pay stubs, bank statements, tax returns
-- **Fairness Audit**: Bias detection across age, income, home ownership (ECOA/Fair Housing compliance)
-- **Real-time Decisions**: WebSocket live feed, Redis caching, rate limiting
-- **Production Ready**: Docker Compose, Prometheus metrics, Grafana dashboards
+Mortgage decisions combine predictive modeling with explainability, fairness, and operational constraints. The project explores how a model can be exposed through an API and dashboard while keeping evaluation, testing, monitoring, and deployment concerns visible in the repository.
 
----
+## Architecture
 
-## Tech Stack
+```text
+                     ┌──────────────────────┐
+                     │      React UI        │
+                     │ Loan / Risk Dashboard│
+                     └──────────┬───────────┘
+                                │ HTTP / WS
+                                ▼
+                     ┌──────────────────────┐
+                     │     FastAPI API      │
+                     │ Auth · Validation    │
+                     │ Risk · History       │
+                     └──────┬───────┬───────┘
+                            │       │
+                 ┌──────────┘       └─────────────┐
+                 ▼                                ▼
+        ┌────────────────┐                ┌────────────────┐
+        │ PostgreSQL     │                │ Redis          │
+        │ decisions/data │                │ cache/limits   │
+        └────────────────┘                └────────────────┘
 
-| Component | Technology |
+        ┌──────────────────────────────────────────────┐
+        │ ML pipeline                                  │
+        │ XGBoost · LightGBM · NN · SHAP · Fairlearn  │
+        └──────────────────────────────────────────────┘
+                 │
+        ┌────────┴─────────┐
+        ▼                  ▼
+   Docker Compose     Prometheus / Grafana
+
+Document path:
+PDF / image → OCR → extracted application fields → risk workflow
+```
+
+## Engineering highlights
+
+- **ML:** XGBoost, LightGBM, neural-network ensemble, SHAP explainability, SMOTE and model evaluation utilities.
+- **Fairness:** Fairlearn-based auditing and explicit removal of `CODE_GENDER` from the fairness-aware credit-risk implementation, with proxy-bias checks in the code.
+- **Backend:** FastAPI, validation, authentication, WebSockets, Redis caching/rate limiting, PostgreSQL/SQLAlchemy.
+- **Document processing:** PDF/image extraction with `pdfplumber`, `pytesseract`, `pdf2image`, and Pillow.
+- **Observability:** Prometheus metrics, Grafana dashboards, and drift-detection tests.
+- **Delivery:** Docker Compose, separate backend/frontend images, GitHub Actions CI, linting, type checking, tests, coverage, load testing, and vulnerability scanning.
+
+## Tech stack
+
+| Layer | Technologies |
 |---|---|
-| **Backend API** | FastAPI + Uvicorn |
-| **Frontend** | React + IBM Plex Mono |
-| **ML Models** | XGBoost, LightGBM, SHAP |
-| **Database** | PostgreSQL (SQLite fallback) |
-| **Cache** | Redis |
-| **OCR** | pdfplumber, pytesseract, Tesseract |
-| **Fairness** | fairlearn |
-| **Monitoring** | Prometheus + Grafana |
-| **Container** | Docker Compose |
+| ML | XGBoost, LightGBM, TensorFlow, scikit-learn, SHAP, Fairlearn, imbalanced-learn |
+| Backend | Python, FastAPI, Uvicorn, Pydantic, SQLAlchemy |
+| Frontend | React |
+| Data | PostgreSQL, SQLite, Redis |
+| Document processing | pdfplumber, pytesseract, pdf2image, Pillow |
+| MLOps / observability | MLflow, Prometheus, Grafana, Evidently |
+| Infrastructure | Docker, Docker Compose, GitHub Actions |
+| Quality | pytest, pytest-asyncio, pytest-cov, flake8, Black, mypy, Locust |
 
----
+## Repository structure
 
-## Installation
-
-### Quick Start (Docker)
-```bash
-docker-compose up -d
+```text
+Mortgage_AI/
+├── api/                         # FastAPI application modules
+├── ml/                          # Ensemble / model implementations
+├── tests/                       # Unit, drift and load tests
+├── mortgage-frontend/           # React dashboard
+├── data/                        # Data/preprocessing artifacts
+├── docker/                      # Backend/frontend container definitions
+├── monitoring/                  # Prometheus/Grafana configuration
+├── .github/workflows/           # CI/CD workflow
+├── model.py                     # Baseline model comparison workflow
+├── credit_risk_fair.py          # Fairness-aware credit-risk workflow
+├── data_pipeline.py             # Data preparation pipeline
+├── docker-compose.yml           # Local multi-service stack
+├── evaluate.py                  # Evaluation and model-card generation
+└── README.md
 ```
 
-### Manual Installation
-```bash
-cd Mortgage_AI
+## Run locally
 
-# Install all dependencies
+### Docker
+
+```bash
+docker compose up --build
+```
+
+The compose stack defines backend, frontend, PostgreSQL, Redis, MLflow, Prometheus, and Grafana services.
+
+### Backend
+
+```bash
 pip install -r requirements.txt
-
-# For OCR functionality (Linux/Mac)
-sudo apt-get install tesseract-ocr poppler-utils  # Linux
-brew install tesseract poppler                    # Mac
-
-# For Kaggle dataset download
-mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/
-chmod 600 ~/.kaggle/kaggle.json
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
----
+FastAPI documentation is available at `/docs` while the API is running.
 
-## How to Run
+### Frontend
 
-### 1. Start the API server
-```bash
-uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
-```
-API runs on **http://localhost:8000**  
-Interactive docs: http://localhost:8000/docs
-
-### 2. Start the Frontend
 ```bash
 cd mortgage-frontend
 npm install
 npm start
 ```
-Frontend runs on **http://localhost:3000**
 
-### 3. Run Data Pipeline (first time setup)
-```bash
-python data_pipeline.py
-```
-
-### 4. Run Fairness Audit
-```bash
-python fairness_audit.py --model models/xgboost_model.joblib --data data/test.csv
-```
-
-Interactive docs: http://localhost:8001/docs
-
-### 2. Start the Dashboard (in a new terminal)
+### Tests
 
 ```bash
-python dashboard.py
+pytest tests/ -v
 ```
 
-Dashboard runs on **http://localhost:8050**
+The repository includes ensemble tests covering initialization, fitting, prediction, probabilities, evaluation, SHAP explanations, persistence, individual model predictions, and edge cases.
 
----
+## CI/CD
 
-## API Endpoints
+The GitHub Actions workflow runs a Python matrix, dependency installation, lint checks, Black formatting checks, mypy, pytest with coverage, Locust load tests, and a Trivy filesystem security scan. It also contains Docker image build/push and deployment stages.
 
-| Method | Endpoint | Description | Request/Params |
-|---|---|---|---|
-| `POST` | `/analyze` | Analyze loan application | JSON body with income, loan_amount, interest_rate, loan_term, credit_score, existing_loans |
-| `GET` | `/history` | Get last 20 decisions | Query: `?limit=N` (max 100) |
-| `GET` | `/compare` | Compare loan scenarios | Query: `?income=X&loan_amount=Y&credit_score=Z` |
-| `GET` | `/health` | Health check | None |
+## Model evaluation
 
-### Example Request
+`evaluate.py` generates confusion-matrix, ROC, precision-recall, and feature-importance visualizations and performs 5-fold cross-validation.
 
-```bash
-curl -X POST http://localhost:8001/analyze \
-  -H "Content-Type: application/json" \
-  -d '{
-    "income": 50000,
-    "loan_amount": 200000,
-    "interest_rate": 8.5,
-    "loan_term": 5,
-    "credit_score": 650,
-    "existing_loans": 1
-  }'
-```
+The baseline data generator intentionally uses **synthetic loan data**, so its results should not be interpreted as real-world underwriting performance. The evaluation code documents limitations including synthetic data, missing macroeconomic factors, limited application features, and static approval thresholds.
 
-### Example Response
+## Important engineering caveats
 
-```json
-{
-  "decision": "APPROVE",
-  "emi": 4103.31,
-  "risk_level": "LOW",
-  "default_probability": 0.08,
-  "approval_probability": 0.82,
-  "advice": "Application meets criteria - proceed with application",
-  "feature_values": {
-    "debt_to_income_ratio": 0.1333,
-    "emi_to_income_ratio": 8.21,
-    "credit_utilization_score": 0.6364,
-    "loan_burden_index": 0.2833,
-    "affordability_score": 0.9179
-  },
-  "monte_carlo": {
-    "worst_case_emi": 4320.15,
-    "safe_income_threshold": 42500.0,
-    "scenario_breakdown": {"stable": 7400, "stressed": 1800, "crisis": 800}
-  }
-}
-```
+- This is a portfolio/learning system, **not a production underwriting authority**.
+- The repository contains historical and advanced implementations; the current code should be treated as the source of truth when describing the project.
+- Do not commit real credentials, API keys, or production borrower data.
+- Real lending decisions require appropriate validation, governance, legal/compliance review, and human oversight.
 
----
+## Demo
 
-## Project Structure
+Live application: https://mortgage-ai-dyb5.vercel.app
 
-```
-Mortgage_AI/
-├── api.py              # FastAPI REST API (port 8001)
-├── dashboard.py         # Dash dashboard UI (port 8050)
-├── emi.py              # EMI calculator
-├── features.py         # Feature engineering for ML
-├── model.py            # XGBoost model training & prediction
-├── risk.py             # Risk level assessment
-├── advisor.py          # AI mortgage advisor (Ollama)
-├── monte_carlo.py      # Monte Carlo risk simulation
-├── evaluate.py         # Model evaluation & visualizations
-├── best_model.pkl      # Trained XGBoost model
-├── mortgage.db         # SQLite database
-├── CLAUDE.md           # Project documentation
-│
-├── design-system/      # Frontend design assets
-└── mortgage-frontend/  # React frontend (separate)
-```
+## Author
 
----
+**Gaurav Ojha**  
+Computer Science student focused on software engineering, backend systems, cloud infrastructure, and practical AI/ML.
 
-## Model Evaluation
-
-```bash
-python evaluate.py
-```
-
-Generates:
-- `confusion_matrix.png` — Prediction accuracy heatmap
-- `roc_curve.png` — ROC curve with AUC score
-- `precision_recall_curve.png` — Precision-Recall trade-off
-- `feature_importance.png` — Top feature contributions
-- `model_metrics.json` — Full metrics JSON
-
----
-
-## Screenshots
-
-> Add screenshots of the dashboard here:
-> - Dashboard input panel with sliders
-> - Analysis results with decision badge
-> - Monte Carlo 3D risk visualization
-> - Sensitivity analysis chart
-> - History table of past decisions
-
----
-
-## Database Schema
-
-```sql
-CREATE TABLE decisions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp TEXT NOT NULL,
-    income REAL NOT NULL,
-    loan_amount REAL NOT NULL,
-    credit_score INTEGER NOT NULL,
-    decision TEXT NOT NULL,
-    risk_level TEXT NOT NULL,
-    default_probability REAL,
-    emi REAL NOT NULL,
-    advice TEXT
-);
-``` -->
-
-
-# 🚀 Mortgage AI Decision System
-
-AI-powered mortgage loan approval system using **Machine Learning + Monte Carlo Simulation** for intelligent risk assessment and decision-making.
-
----
-
-## 🔥 Features
-
-* 🤖 ML-based loan approval (XGBoost)
-* 📊 Monte Carlo simulation for risk analysis
-* ⚡ FastAPI backend (high-performance APIs)
-* 🌐 React frontend dashboard (modern UI)
-* 🧠 AI advisor integration (Ollama)
-* 📈 Real-time analytics & visualization
-* 🗄️ SQLite database for decision tracking
-
----
-
-## 🧱 Tech Stack
-
-| Component         | Technology                  |
-| ----------------- | --------------------------- |
-| **Frontend**      | React + Tailwind + Plotly   |
-| **Backend API**   | FastAPI + Uvicorn           |
-| **ML Model**      | XGBoost                     |
-| **Database**      | SQLite                      |
-| **Validation**    | Pydantic                    |
-| **Visualization** | Plotly, Matplotlib, Seaborn |
-| **Language**      | Python 3.10+                |
-
----
-
-## ⚙️ Installation
-
-```bash
-# Clone repo
-git clone https://github.com/YOUR_USERNAME/Mortgage_AI.git
-cd Mortgage_AI
-```
-
-### Backend setup
-
-```bash
-pip install fastapi uvicorn sqlalchemy pydantic
-pip install scikit-learn xgboost joblib
-pip install matplotlib seaborn numpy
-```
-
-### Frontend setup
-
-```bash
-cd mortgage-frontend
-npm install
-```
-
----
-
-## ▶️ How to Run
-
-### 1️⃣ Start Backend API
-
-```bash
-python api.py
-```
-
-📍 Runs on:
-http://localhost:8001
-
-📘 API Docs:
-http://localhost:8001/docs
-
----
-
-### 2️⃣ Start Frontend (React)
-
-```bash
-cd mortgage-frontend
-npm start
-```
-
-🌐 Runs on:
-http://localhost:3000
-
----
-
-## 🔌 API Endpoints
-
-| Method | Endpoint   | Description              |
-| ------ | ---------- | ------------------------ |
-| `POST` | `/analyze` | Analyze loan application |
-| `GET`  | `/history` | Fetch recent decisions   |
-| `GET`  | `/compare` | Compare loan scenarios   |
-| `GET`  | `/health`  | API health check         |
-
----
-
-## 📥 Example Request
-
-```bash
-curl -X POST http://localhost:8001/analyze \
-  -H "Content-Type: application/json" \
-  -d '{
-    "income": 50000,
-    "loan_amount": 200000,
-    "interest_rate": 8.5,
-    "loan_term": 5,
-    "credit_score": 650,
-    "existing_loans": 1
-  }'
-```
-
----
-
-## 📤 Example Response
-
-```json
-{
-  "decision": "APPROVE",
-  "emi": 4103.31,
-  "risk_level": "LOW",
-  "default_probability": 0.08,
-  "approval_probability": 0.82,
-  "advice": "Application meets criteria",
-  "monte_carlo": {
-    "worst_case_emi": 4320.15,
-    "safe_income_threshold": 42500.0
-  }
-}
-```
-
----
-
-## 📁 Project Structure
-
-```
-Mortgage_AI/
-│
-├── api.py                  # FastAPI backend (port 8001)
-├── emi.py
-├── features.py
-├── model.py
-├── risk.py
-├── advisor.py
-├── monte_carlo.py
-├── evaluate.py
-├── best_model.pkl
-├── mortgage.db
-│
-├── mortgage-frontend/      # React frontend (port 3000)
-│
-└── design-system/
-```
-
----
-
-## 📊 Model Evaluation
-
-```bash
-python evaluate.py
-```
-
-Generates:
-
-* confusion matrix
-* ROC curve
-* precision-recall curve
-* feature importance
-
----
-
-## 🗄️ Database Schema
-
-```sql
-CREATE TABLE decisions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp TEXT NOT NULL,
-    income REAL,
-    loan_amount REAL,
-    credit_score INTEGER,
-    decision TEXT,
-    risk_level TEXT,
-    default_probability REAL,
-    emi REAL,
-    advice TEXT
-);
-```
-
----
-
-## ⚠️ Notes
-
-* Old Dash dashboard (port 8050) is deprecated
-* Use React frontend (port 3000)
-* Ensure backend is running before frontend
-
----
-
-## 💡 Future Improvements
-
-* 🔐 Authentication system
-* ☁️ Cloud deployment (AWS/Vercel)
-* 📊 Advanced analytics dashboard
-* 🤖 Better AI advisor integration
-
----
-
-## 👨‍💻 Author
-
-Gaurav Ojha
-Engineering Student | AI/ML Developer
-
----
-
-## ⭐ If you like this project, give it a star!
+[GitHub](https://github.com/Gaurav-Ojha65) · [Portfolio](https://gaurav-ojha-portfolio.netlify.app) · [LinkedIn](https://www.linkedin.com/in/gaurav-ojha18/)
