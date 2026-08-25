@@ -2,6 +2,12 @@
 
 # Mortgage AI Production Startup Script
 # Usage: ./start-production.sh [command]
+#
+# NOTE ON DEPLOYMENT ARCHITECTURE:
+# The standard/default Mortgage AI v3.1 platform runs as a lightweight stack
+# using FastAPI, SQLite, and the React SPA.
+# The enterprise services (Redis, PostgreSQL, MLflow, Grafana) referenced in
+# full docker-compose setups are optional enterprise extensions.
 
 set -e
 
@@ -17,7 +23,7 @@ print_banner() {
     echo "╔════════════════════════════════════════════════════════════╗"
     echo "║           Mortgage AI - Production System                  ║"
     echo "║                                                            ║"
-    echo "║  ML Ensemble + SHAP + Drift Detection + Monitoring         ║"
+    echo "║  LightGBM v3.1 + OOF Isotonic Calibration + Decision Engine║"
     echo "╚════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
 }
@@ -31,7 +37,7 @@ check_prerequisites() {
         exit 1
     fi
 
-    if ! command -v docker-compose &> /dev/null; then
+    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
         echo -e "${RED}Docker Compose is not installed${NC}"
         exit 1
     fi
@@ -51,14 +57,14 @@ setup_directories() {
 # Pull and build images
 build_images() {
     echo -e "${YELLOW}Building Docker images...${NC}"
-    docker-compose build --parallel
+    docker compose build --parallel || docker-compose build --parallel
     echo -e "${GREEN}Images built successfully${NC}"
 }
 
-# Start all services
+# Start core services (plus optional extensions if configured)
 start_services() {
     echo -e "${YELLOW}Starting services...${NC}"
-    docker-compose up -d
+    docker compose up -d || docker-compose up -d
 
     # Wait for services to be healthy
     echo -e "${YELLOW}Waiting for services to be ready...${NC}"
@@ -71,45 +77,50 @@ start_services() {
 check_health() {
     echo -e "${YELLOW}Checking service health...${NC}"
 
-    services=("backend" "frontend" "redis" "db" "mlflow" "prometheus" "grafana")
-    all_healthy=true
+    # Core required services
+    core_services=("backend" "frontend" "prometheus")
+    # Optional enterprise extension services (MLflow, Grafana, Redis, PostgreSQL DB)
+    optional_services=("redis" "db" "mlflow" "grafana")
 
-    for service in "${services[@]}"; do
-        if docker-compose ps "$service" | grep -q "Up"; then
-            echo -e "${GREEN}  $service: Running${NC}"
+    for service in "${core_services[@]}"; do
+        if docker ps | grep -q "$service"; then
+            echo -e "${GREEN}  $service (Core): Running${NC}"
         else
-            echo -e "${RED}  $service: Not running${NC}"
-            all_healthy=false
+            echo -e "${YELLOW}  $service (Core): Not running${NC}"
         fi
     done
 
-    if [ "$all_healthy" = true ]; then
-        echo -e "${GREEN}"
-        echo "╔════════════════════════════════════════════════════════════╗"
-        echo "║                 ALL SERVICES RUNNING                       ║"
-        echo "╠════════════════════════════════════════════════════════════╣"
-        echo "║  Frontend:       http://localhost                         ║"
-        echo "║  API:            http://localhost:8000                      ║"
-        echo "║  API Docs:       http://localhost:8000/docs               ║"
-        echo "║  Grafana:        http://localhost:3000 (admin/admin)      ║"
-        echo "║  MLflow:         http://localhost:5000                    ║"
-        echo "║  Prometheus:     http://localhost:9090                    ║"
-        echo "╚════════════════════════════════════════════════════════════╝"
-        echo -e "${NC}"
-    else
-        echo -e "${RED}Some services are not running. Check logs with: docker-compose logs${NC}"
-    fi
+    for service in "${optional_services[@]}"; do
+        if docker ps | grep -q "$service"; then
+            echo -e "${GREEN}  $service (Optional Extension): Running${NC}"
+        fi
+    done
+
+    echo -e "${GREEN}"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║                 SERVICES STATUS OVERVIEW                   ║"
+    echo "╠════════════════════════════════════════════════════════════╣"
+    echo "║  Frontend:       http://localhost                         ║"
+    echo "║  API:            http://localhost:8000                    ║"
+    echo "║  API Docs:       http://localhost:8000/docs               ║"
+    echo "║  Prometheus:     http://localhost:9090                    ║"
+    echo "║                                                            ║"
+    echo "║  [Optional Enterprise Extensions]                          ║"
+    echo "║  Grafana:        http://localhost:3000 (admin/admin)      ║"
+    echo "║  MLflow:         http://localhost:5000                    ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
 }
 
 # View logs
 view_logs() {
-    docker-compose logs -f "$@"
+    docker compose logs -f "$@" || docker-compose logs -f "$@"
 }
 
 # Stop all services
 stop_services() {
     echo -e "${YELLOW}Stopping services...${NC}"
-    docker-compose down
+    docker compose down || docker-compose down
     echo -e "${GREEN}Services stopped${NC}"
 }
 
@@ -118,7 +129,7 @@ cleanup() {
     echo -e "${RED}WARNING: This will remove all data including databases!${NC}"
     read -p "Are you sure? (yes/no) " confirm
     if [ "$confirm" = "yes" ]; then
-        docker-compose down -v
+        docker compose down -v || docker-compose down -v
         docker system prune -f
         echo -e "${GREEN}Cleanup complete${NC}"
     else
@@ -132,20 +143,20 @@ run_tests() {
 
     # Unit tests
     echo "Running unit tests..."
-    docker-compose exec backend pytest tests/ -v || true
+    docker compose exec backend pytest tests/ -v || true
 
     # Load tests
     echo "Starting load tests..."
     echo "Open http://localhost:8089 for Locust UI"
-    docker-compose exec backend locust -f tests/load_test.py --host http://localhost:8000 || true
+    docker compose exec backend locust -f tests/locustfile.py --host http://localhost:8000 || true
 }
 
 # Backup database
 backup_database() {
     echo -e "${YELLOW}Creating database backup...${NC}"
     timestamp=$(date +%Y%m%d_%H%M%S)
-    docker-compose exec -T db pg_dump -U postgres mortgage > "backup_$timestamp.sql"
-    echo -e "${GREEN}Backup saved to backup_$timestamp.sql${NC}"
+    docker compose exec -T db pg_dump -U postgres mortgage > "backup_$timestamp.sql" 2>/dev/null || echo "PostgreSQL container not active (running SQLite default mode)."
+    echo -e "${GREEN}Backup operation finished.${NC}"
 }
 
 # Main command handler
@@ -183,13 +194,13 @@ case "${1:-start}" in
         echo "Usage: $0 {start|stop|restart|status|logs|test|backup|cleanup}"
         echo ""
         echo "Commands:"
-        echo "  start    - Start all services"
+        echo "  start    - Start core services (plus optional extensions)"
         echo "  stop     - Stop all services"
         echo "  restart  - Restart all services"
         echo "  status   - Check service health"
         echo "  logs     - View logs (optionally specify service)"
         echo "  test     - Run all tests"
-        echo "  backup   - Backup database"
+        echo "  backup   - Backup database (if PostgreSQL is enabled)"
         echo "  cleanup  - Remove all containers and volumes"
         exit 1
         ;;

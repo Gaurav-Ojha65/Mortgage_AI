@@ -9,7 +9,7 @@
     {
       "stage": 2,
       "name": "Base Classifier",
-      "details": "LightGBM (500 trees, lr=0.03, early stopping decoupled)"
+      "details": "LightGBM v3.1 (651 trees, lr=0.022, Optuna Trial #47)"
     },
     {
       "stage": 3,
@@ -19,7 +19,7 @@
     {
       "stage": 4,
       "name": "3-Tier Economic Decision Engine",
-      "details": "Approve (p <= 0.055), Manual Review (0.055 < p < 0.405), Reject (p >= 0.405)"
+      "details": "Approve (p <= 0.045), Manual Review (0.045 < p < 0.335), Reject (p >= 0.335)"
     },
     {
       "stage": 5,

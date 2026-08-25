@@ -44,9 +44,9 @@ def generate_all_visualizations():
         "title": "Mortgage AI Production-Oriented ML Architecture",
         "stages": [
             {"stage": 1, "name": "Input Preprocessing", "details": "15 standard MODEL_FEATURES, missing value imputation, strict schema validation"},
-            {"stage": 2, "name": "Base Classifier", "details": "LightGBM (500 trees, lr=0.03, early stopping decoupled)"},
+            {"stage": 2, "name": "Base Classifier", "details": "LightGBM v3.1 (651 trees, lr=0.022, Optuna Trial #47)"},
             {"stage": 3, "name": "Probability Calibrator", "details": "5-Fold Out-of-Fold (OOF) Isotonic Regressor (fit on N=99,856 real training samples)"},
-            {"stage": 4, "name": "3-Tier Economic Decision Engine", "details": "Approve (p <= 0.055), Manual Review (0.055 < p < 0.405), Reject (p >= 0.405)"},
+            {"stage": 4, "name": "3-Tier Economic Decision Engine", "details": "Approve (p <= 0.045), Manual Review (0.045 < p < 0.335), Reject (p >= 0.335)"},
             {"stage": 5, "name": "Explainability & Governance", "details": "TreeExplainer SHAP log-odds feature attributions + Fair-Lending Fairness Auditing"},
         ]
     }
@@ -71,18 +71,25 @@ def generate_all_visualizations():
         json.dump(oof_flow_data, f, indent=2)
 
     # -------------------------------------------------------------------------
-    # 3. Reliability / Calibration Plot (Measured from subgroup_calibration.json)
+    # 3. Reliability / Calibration Plot
     # -------------------------------------------------------------------------
-    cal_file = METRICS_DIR / "subgroup_calibration.json"
+    cal_file = METRICS_DIR / "hpo_subgroup_calibration.json"
+    if not cal_file.exists():
+        cal_file = METRICS_DIR / "subgroup_calibration.json"
+    
     if cal_file.exists():
         with open(cal_file, "r") as f:
             cal_json = json.load(f)
         overall_bins = cal_json["overall_portfolio"]["bins"]
-        valid_bins = [b for b in overall_bins if b["mean_predicted_prob"] is not None]
 
-        mean_preds = [b["mean_predicted_prob"] for b in valid_bins]
-        actual_rates = [b["actual_default_rate"] for b in valid_bins]
-        counts = [b["sample_count"] for b in valid_bins]
+        if overall_bins and "p_mean" in overall_bins[0]:
+            mean_preds = [b["p_mean"] for b in overall_bins if b.get("p_mean") is not None]
+            actual_rates = [b["o_mean"] for b in overall_bins if b.get("o_mean") is not None]
+            counts = [b["count"] for b in overall_bins if b.get("count") is not None]
+        else:
+            mean_preds = [b["mean_predicted_prob"] for b in overall_bins if b.get("mean_predicted_prob") is not None]
+            actual_rates = [b["actual_default_rate"] for b in overall_bins if b.get("actual_default_rate") is not None]
+            counts = [b["sample_count"] for b in overall_bins if b.get("sample_count") is not None]
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), gridspec_kw={"height_ratios": [3, 1]})
         ax1.plot([0, 1], [0, 1], "k--", label="Perfect Calibration", alpha=0.7)
@@ -105,12 +112,15 @@ def generate_all_visualizations():
         plt.close()
 
         with open(VIZ_DIR / "reliability_calibration_data.json", "w", encoding="utf-8") as f:
-            json.dump(valid_bins, f, indent=2)
+            json.dump(overall_bins, f, indent=2)
 
     # -------------------------------------------------------------------------
     # 4. Global SHAP Feature Importance Plot
     # -------------------------------------------------------------------------
-    shap_file = METRICS_DIR / "shap_validation.json"
+    shap_file = METRICS_DIR / "hpo_shap_validation.json"
+    if not shap_file.exists():
+        shap_file = METRICS_DIR / "shap_validation.json"
+
     if shap_file.exists():
         with open(shap_file, "r") as f:
             shap_json = json.load(f)
@@ -121,7 +131,7 @@ def generate_all_visualizations():
         plt.figure(figsize=(10, 6))
         bars = plt.barh(labels, values, color="#2E7D32", edgecolor="#1B5E20", alpha=0.85)
         plt.xlabel("Mean Absolute SHAP Value (Impact on Log-Odds Risk)", fontsize=11)
-        plt.title("Top 10 Global Feature Importances — LightGBM (SHAP TreeExplainer)", fontsize=13, fontweight="bold")
+        plt.title("Top 10 Global Feature Importances — LightGBM v3.1 (TreeExplainer)", fontsize=13, fontweight="bold")
         plt.grid(axis="x", linestyle=":", alpha=0.6)
 
         for bar in bars:
@@ -153,21 +163,21 @@ def generate_all_visualizations():
         plt.close()
 
     # -------------------------------------------------------------------------
-    # 6. Policy Threshold Visualization Plot
+    # 6. Policy Threshold Visualization Plot (Canonical: 0.045 / 0.335)
     # -------------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.axvspan(0.0, 0.055, color="#C8E6C9", alpha=0.7, label="Automatic Approval (p <= 0.055) [72.40%]")
-    ax.axvspan(0.055, 0.405, color="#FFF9C4", alpha=0.7, label="Manual Underwriting Review (0.055 < p < 0.405) [24.61%]")
-    ax.axvspan(0.405, 1.0, color="#FFCDD2", alpha=0.7, label="Automatic Rejection (p >= 0.405) [2.99%]")
+    ax.axvspan(0.0, 0.045, color="#C8E6C9", alpha=0.7, label="Automatic Approval (p <= 0.045) [71.05%]")
+    ax.axvspan(0.045, 0.335, color="#FFF9C4", alpha=0.7, label="Manual Underwriting Review (0.045 < p < 0.335) [24.09%]")
+    ax.axvspan(0.335, 1.0, color="#FFCDD2", alpha=0.7, label="Automatic Rejection (p >= 0.335) [4.86%]")
 
-    ax.axvline(0.055, color="#2E7D32", linestyle="--", linewidth=2)
-    ax.axvline(0.405, color="#C62828", linestyle="--", linewidth=2)
+    ax.axvline(0.045, color="#2E7D32", linestyle="--", linewidth=2)
+    ax.axvline(0.335, color="#C62828", linestyle="--", linewidth=2)
 
     ax.set_xlim([0, 1])
     ax.set_ylim([0, 1])
     ax.set_xlabel("Calibrated Default Probability (p_cal)", fontsize=11)
     ax.set_yticks([])
-    ax.set_title("Frozen 3-Tier Economic Decision Policy Architecture", fontsize=13, fontweight="bold")
+    ax.set_title("Frozen 3-Tier Economic Decision Policy Architecture (v3.1-policy-v1)", fontsize=13, fontweight="bold")
     ax.legend(loc="upper right", framealpha=0.95)
 
     plt.tight_layout()
@@ -177,7 +187,10 @@ def generate_all_visualizations():
     # -------------------------------------------------------------------------
     # 7. Policy Sensitivity Heatmap Plot
     # -------------------------------------------------------------------------
-    sens_file = METRICS_DIR / "policy_sensitivity.json"
+    sens_file = METRICS_DIR / "hpo_policy_sensitivity.json"
+    if not sens_file.exists():
+        sens_file = METRICS_DIR / "policy_sensitivity.json"
+
     if sens_file.exists():
         with open(sens_file, "r") as f:
             sens_json = json.load(f)
@@ -197,10 +210,13 @@ def generate_all_visualizations():
         plt.ylabel("Approve Threshold", fontsize=11)
         plt.title("Policy Sensitivity Cost Surface ($M)", fontsize=13, fontweight="bold")
 
-        # Mark frozen operating point
-        app_idx = list(pivot_cost.index).index(0.055)
-        rej_idx = list(pivot_cost.columns).index(0.405)
-        plt.scatter(rej_idx, app_idx, color="blue", s=150, zorder=5, edgecolors="black", linewidth=2, label="Frozen Policy ($4.08M)")
+        # Mark canonical operating point (0.045 / 0.335)
+        app_target = 0.045 if 0.045 in pivot_cost.index else pivot_cost.index[0]
+        rej_target = 0.335 if 0.335 in pivot_cost.columns else pivot_cost.columns[0]
+        app_idx = list(pivot_cost.index).index(app_target)
+        rej_idx = list(pivot_cost.columns).index(rej_target)
+        cost_val = pivot_cost.loc[app_target, rej_target]
+        plt.scatter(rej_idx, app_idx, color="blue", s=150, zorder=5, edgecolors="black", linewidth=2, label=f"Canonical Policy (${cost_val:.2f}M)")
         plt.legend(loc="upper left")
 
         plt.tight_layout()
@@ -210,32 +226,37 @@ def generate_all_visualizations():
     # -------------------------------------------------------------------------
     # 8. Fairness Subgroup Comparison Plot
     # -------------------------------------------------------------------------
-    fair_file = METRICS_DIR / "fairness_report.json"
+    fair_file = METRICS_DIR / "hpo_fairness_report.json"
+    if not fair_file.exists():
+        fair_file = METRICS_DIR / "fairness_report.json"
+
     if fair_file.exists():
         with open(fair_file, "r") as f:
             fair_json = json.load(f)
-        home_groups = fair_json["subgroups"]["home_ownership"]
-        group_names = list(home_groups.keys())
-        app_rates = [home_groups[g]["approval_rate"] * 100 for g in group_names]
-        obs_defaults = [home_groups[g]["observed_default_rate"] * 100 for g in group_names]
+        
+        home_groups = fair_json.get("subgroups", {}).get("home_ownership") or fair_json.get("subgroup_metrics", {}).get("home_ownership", {})
+        if home_groups:
+            group_names = list(home_groups.keys())
+            app_rates = [home_groups[g]["approval_rate"] * 100 for g in group_names]
+            obs_defaults = [home_groups[g]["observed_default_rate"] * 100 for g in group_names]
 
-        x = np.arange(len(group_names))
-        width = 0.35
+            x = np.arange(len(group_names))
+            width = 0.35
 
-        fig, ax = plt.subplots(figsize=(8, 5))
-        ax.bar(x - width/2, app_rates, width, label="Approval Rate (%)", color="#1976D2", alpha=0.85)
-        ax.bar(x + width/2, obs_defaults, width, label="Observed Default Rate (%)", color="#E64A19", alpha=0.85)
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.bar(x - width/2, app_rates, width, label="Approval Rate (%)", color="#1976D2", alpha=0.85)
+            ax.bar(x + width/2, obs_defaults, width, label="Observed Default Rate (%)", color="#E64A19", alpha=0.85)
 
-        ax.set_ylabel("Rate (%)", fontsize=11)
-        ax.set_title("Fairness Audit: Approval vs Default Rate by Home Ownership", fontsize=13, fontweight="bold")
-        ax.set_xticks(x)
-        ax.set_xticklabels(group_names, fontsize=11)
-        ax.legend()
-        ax.grid(axis="y", linestyle=":", alpha=0.6)
+            ax.set_ylabel("Rate (%)", fontsize=11)
+            ax.set_title("Fairness Audit: Approval vs Default Rate by Home Ownership", fontsize=13, fontweight="bold")
+            ax.set_xticks(x)
+            ax.set_xticklabels(group_names, fontsize=11)
+            ax.legend()
+            ax.grid(axis="y", linestyle=":", alpha=0.6)
 
-        plt.tight_layout()
-        plt.savefig(VIZ_DIR / "fairness_subgroup_disparity.png", dpi=300)
-        plt.close()
+            plt.tight_layout()
+            plt.savefig(VIZ_DIR / "fairness_subgroup_disparity.png", dpi=300)
+            plt.close()
 
     logger.info(f"All 8 visualization artifacts generated successfully in {VIZ_DIR.absolute()}")
 
