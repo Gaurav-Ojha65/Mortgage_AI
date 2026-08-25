@@ -1,0 +1,101 @@
+.emi-page { display: flex; flex-direction: column; gap: 20px; }
+.emi-header {}
+.emi-title { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+.emi-sub   { font-size: 13px; color: var(--text-muted); }
+
+.emi-main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .emi-main-grid { grid-template-columns: 1fr; } }
+
+.emi-input-card, .emi-results-card {
+  background: rgba(15,22,34,0.7);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+/* Sliders */
+.emi-slider-group { margin-bottom: 22px; }
+.emi-slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.emi-slider-label { font-size: 13px; color: #94A3B8; font-weight: 600; }
+.emi-slider-val   { font-size: 18px; font-weight: 800; color: #E8A020; font-family: 'JetBrains Mono', monospace; }
+.emi-slider-range  { display: flex; justify-content: space-between; font-size: 11px; color: #475569; margin-top: 4px; }
+.emi-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  outline: none;
+  cursor: pointer;
+}
+.emi-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #E8A020;
+  border: 3px solid #0F1622;
+  box-shadow: 0 0 10px rgba(232,160,32,0.4);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.emi-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.emi-slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #E8A020; border: 3px solid #0F1622;
+  box-shadow: 0 0 10px rgba(232,160,32,0.4); cursor: pointer;
+}
+
+/* Donut section */
+.emi-donut-section { display: flex; align-items: center; gap: 20px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.emi-donut-info { display: flex; flex-direction: column; gap: 8px; }
+.emi-donut-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #94A3B8; }
+.emi-donut-row.total { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; font-weight: 700; color: #E2E8F0; }
+.emi-donut-row .mono { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #E2E8F0; }
+
+/* Results */
+.emi-big-emi { text-align: center; margin-bottom: 24px; }
+.emi-big-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; color: #64748B; font-weight: 600; margin-bottom: 8px; }
+.emi-big-value { font-size: 48px; font-weight: 900; color: #E8A020; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+.emi-big-sub   { font-size: 12px; color: #475569; margin-top: 6px; }
+
+.emi-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+.emi-stat {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.emi-stat-val   { font-size: 18px; font-weight: 800; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
+.emi-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; font-weight: 600; }
+
+/* Bar chart */
+.emi-chart { margin-top: 8px; }
+.emi-chart-bars {
+  display: flex;
+  gap: 3px;
+  height: 120px;
+  align-items: flex-end;
+  padding: 0 4px;
+}
+.emi-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.emi-bar-stack { width: 100%; border-radius: 3px 3px 0 0; overflow: hidden; display: flex; flex-direction: column; transition: height 0.8s ease; }
+.emi-bar-interest { background: #E8A020; }
+.emi-bar-principal { background: #22C55E; }
+.emi-bar-label { font-size: 9px; color: #475569; white-space: nowrap; }
+
+.emi-chart-legend { display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 11px; color: #64748B; }
+.emi-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+.emi-disclaimer {
+  padding: 14px 18px;
+  background: rgba(30,41,59,0.5);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.6;
+}
+.emi-disclaimer strong { color: #64748B; }
+
+.mono { font-family: 'JetBrains Mono', monospace; }

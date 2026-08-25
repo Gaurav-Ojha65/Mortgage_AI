@@ -1,0 +1,30 @@
+{
+  "title": "Mortgage AI Production-Oriented ML Architecture",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Input Preprocessing",
+      "details": "15 standard MODEL_FEATURES, missing value imputation, strict schema validation"
+    },
+    {
+      "stage": 2,
+      "name": "Base Classifier",
+      "details": "LightGBM (500 trees, lr=0.03, early stopping decoupled)"
+    },
+    {
+      "stage": 3,
+      "name": "Probability Calibrator",
+      "details": "5-Fold Out-of-Fold (OOF) Isotonic Regressor (fit on N=99,856 real training samples)"
+    },
+    {
+      "stage": 4,
+      "name": "3-Tier Economic Decision Engine",
+      "details": "Approve (p <= 0.055), Manual Review (0.055 < p < 0.405), Reject (p >= 0.405)"
+    },
+    {
+      "stage": 5,
+      "name": "Explainability & Governance",
+      "details": "TreeExplainer SHAP log-odds feature attributions + Fair-Lending Fairness Auditing"
+    }
+  ]
+}

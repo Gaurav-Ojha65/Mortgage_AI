@@ -1,0 +1,95 @@
+{
+  "model_name": "LightGBM",
+  "model_version": "v3.0-oof-calibrated",
+  "calibration_version": "oof-iso-v3.0",
+  "methodology": "5-Fold Stratified OOF Calibration on Real Training Split",
+  "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+  "environment": {
+    "python_version": "3.14.3",
+    "os": "Windows-11-10.0.26200-SP0",
+    "lightgbm_version": "4.6.0",
+    "scikit_learn_version": "1.8.0",
+    "joblib_version": "1.5.3"
+  },
+  "dataset_provenance": {
+    "real_train_csv_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+    "feature_schema_sha256": "1e4fb88a829079dd1d44eb13e439d2ded7c2981d9ea712dc55dffa9dbe810f32",
+    "real_train_samples": 99856,
+    "smote_train_samples": 139659,
+    "val_samples": 21398,
+    "test_samples": 21398,
+    "natural_default_prevalence": 0.0676
+  },
+  "oof_configuration": {
+    "n_splits": 5,
+    "random_seed": 42,
+    "fold_balancing": "SMOTE(0.5) applied strictly to fold-training partition",
+    "early_stopping_used_in_oof": false,
+    "lightgbm_params": {
+      "n_estimators": 500,
+      "max_depth": 6,
+      "learning_rate": 0.03,
+      "num_leaves": 31,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_samples": 25,
+      "reg_alpha": 0.2,
+      "reg_lambda": 2.0,
+      "random_state": 42,
+      "verbose": -1,
+      "n_jobs": -1
+    },
+    "feature_names": [
+      "credit_score",
+      "annual_income",
+      "loan_amount",
+      "loan_term",
+      "dti_ratio",
+      "employment_years",
+      "num_credit_lines",
+      "num_derogatory_marks",
+      "credit_utilization",
+      "late_payment_severity_score",
+      "home_ownership",
+      "purpose_encoded",
+      "num_late_payments",
+      "savings_balance",
+      "monthly_expenses"
+    ]
+  },
+  "measured_oof_metrics": {
+    "raw_lightgbm": {
+      "roc_auc": 0.8553,
+      "pr_auc": 0.3882,
+      "brier_score": 0.0502,
+      "ece": 0.0058,
+      "macro_ece": 0.0366,
+      "n_samples": 99856,
+      "n_splits": 5,
+      "execution_time_s": 11.15
+    },
+    "isotonic_calibrated": {
+      "roc_auc": 0.8562,
+      "pr_auc": 0.3823,
+      "brier_score": 0.05,
+      "ece": 0.0,
+      "macro_ece": 0.0,
+      "fit_time_s": 0.03
+    },
+    "sigmoid_calibrated": {
+      "roc_auc": 0.8553,
+      "pr_auc": 0.3882,
+      "brier_score": 0.0516,
+      "ece": 0.0104,
+      "macro_ece": 0.0905,
+      "fit_time_s": 0.06
+    }
+  },
+  "saved_artifacts": {
+    "raw_base_model": "ml/models/lightgbm.joblib",
+    "oof_calibrator_isotonic": "ml/models/lightgbm_oof_calibrator_isotonic.joblib",
+    "oof_calibrator_sigmoid": "ml/models/lightgbm_oof_calibrator_sigmoid.joblib",
+    "calibrated_pipeline": "ml/models/lightgbm_calibrated_pipeline.joblib"
+  },
+  "created_at": "2026-08-24T16:08:15.650505"
+}

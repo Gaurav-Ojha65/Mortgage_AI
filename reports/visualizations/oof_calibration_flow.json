@@ -1,0 +1,11 @@
+{
+  "title": "Out-of-Fold Cross-Calibration Flow",
+  "description": "Prevents data leakage by separating training, calibration, and policy validation",
+  "protocol": {
+    "training_partition": "data/real_train.csv (N=99,856 un-augmented real records)",
+    "cross_validation": "5-Fold Stratified K-Fold CV with fold-internal SMOTE",
+    "calibrator_fitting": "Isotonic regression fit on concatenated OOF predictions (p_oof, y_real)",
+    "policy_optimization": "Thresholds optimized exclusively on val.csv (N=21,398)",
+    "final_evaluation": "Strictly measured on untouched test.csv (N=21,398)"
+  }
+}

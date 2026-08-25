@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "source": "validation_split_optimization",
+    "model_version": "v3.1",
+    "calibration_version": "oof-iso-v3.1",
+    "policy_version": "v3.1-policy-v1",
+    "val_sample_size": 21398,
+    "val_default_prevalence": 0.0676,
+    "optimized_at": "2026-08-24T23:26:39.185110",
+    "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+    "training_data_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+    "feature_schema_sha256": "1e4fb88a829079dd1d44eb13e439d2ded7c2981d9ea712dc55dffa9dbe810f32",
+    "optuna_trial_number": 47,
+    "random_seed": 42
+  },
+  "cost_model": {
+    "cost_fn": 10000.0,
+    "cost_fp": 1000.0,
+    "cost_manual_review": 150.0,
+    "is_demonstration": true
+  },
+  "frozen_thresholds": {
+    "three_tier_economic": {
+      "approve_threshold": 0.045,
+      "reject_threshold": 0.335,
+      "val_expected_cost": 3975900.0,
+      "max_review_rate_constraint": 0.25
+    },
+    "f1_optimal": {
+      "threshold": 0.22,
+      "val_f1": 0.4449
+    },
+    "balanced_accuracy": {
+      "threshold": 0.075,
+      "val_balanced_acc": 0.783
+    },
+    "cost_sensitive_10_1": {
+      "threshold": 0.085,
+      "cost_ratio": "10:1"
+    },
+    "cost_sensitive_5_1": {
+      "threshold": 0.185,
+      "cost_ratio": "5:1"
+    }
+  }
+}

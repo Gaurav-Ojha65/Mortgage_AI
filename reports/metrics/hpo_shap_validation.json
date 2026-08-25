@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "analysis_type": "hpo_candidate_shap_validation",
+    "model_name": "LightGBM (HPO Candidate)",
+    "model_version": "v3.1-hpo-candidate",
+    "feature_count": 15,
+    "active_delinquency_feature": "late_payment_severity_score",
+    "obsolete_features_checked": [
+      "payment_history_score"
+    ],
+    "mathematical_framework": "TreeExplainer exact Shapley values on raw tree margin log-odds f(x)",
+    "architectural_separation": {
+      "model_explanation": "Shapley feature contributions explaining the raw model margin score f(x) = log(p / (1 - p))",
+      "policy_explanation": "Decision routing based on calibrated default probability thresholds p_cal and asymmetric economic loss trade-offs"
+    }
+  },
+  "additivity_verification": {
+    "samples_verified": 100,
+    "max_reconstruction_error": 1.2434497875801753e-14,
+    "mean_reconstruction_error": 4.005684672847565e-15,
+    "is_mathematically_additive": true
+  },
+  "global_feature_importance_top_10": [
+    {
+      "rank": 1,
+      "feature": "late_payment_severity_score",
+      "label": "Late Payment Severity Score (0=worst, 1=perfect)",
+      "mean_absolute_shap": 0.85659
+    },
+    {
+      "rank": 2,
+      "feature": "credit_utilization",
+      "label": "Credit Utilization",
+      "mean_absolute_shap": 0.63147
+    },
+    {
+      "rank": 3,
+      "feature": "loan_term",
+      "label": "Loan Term (months)",
+      "mean_absolute_shap": 0.48944
+    },
+    {
+      "rank": 4,
+      "feature": "purpose_encoded",
+      "label": "Loan Purpose",
+      "mean_absolute_shap": 0.48657
+    },
+    {
+      "rank": 5,
+      "feature": "num_derogatory_marks",
+      "label": "Severe Delinquency (90+ days, count)",
+      "mean_absolute_shap": 0.34941
+    },
+    {
+      "rank": 6,
+      "feature": "num_late_payments",
+      "label": "Mild Late Payments (30-59 days, count)",
+      "mean_absolute_shap": 0.32547
+    },
+    {
+      "rank": 7,
+      "feature": "num_credit_lines",
+      "label": "Open Credit Lines",
+      "mean_absolute_shap": 0.18738
+    },
+    {
+      "rank": 8,
+      "feature": "home_ownership",
+      "label": "Home Ownership",
+      "mean_absolute_shap": 0.13766
+    },
+    {
+      "rank": 9,
+      "feature": "employment_years",
+      "label": "Employment History (years)",
+      "mean_absolute_shap": 0.11719
+    },
+    {
+      "rank": 10,
+      "feature": "annual_income",
+      "label": "Annual Income",
+      "mean_absolute_shap": 0.09233
+    }
+  ],
+  "all_feature_importances": [
+    {
+      "rank": 1,
+      "feature": "late_payment_severity_score",
+      "label": "Late Payment Severity Score (0=worst, 1=perfect)",
+      "mean_absolute_shap": 0.85659
+    },
+    {
+      "rank": 2,
+      "feature": "credit_utilization",
+      "label": "Credit Utilization",
+      "mean_absolute_shap": 0.63147
+    },
+    {
+      "rank": 3,
+      "feature": "loan_term",
+      "label": "Loan Term (months)",
+      "mean_absolute_shap": 0.48944
+    },
+    {
+      "rank": 4,
+      "feature": "purpose_encoded",
+      "label": "Loan Purpose",
+      "mean_absolute_shap": 0.48657
+    },
+    {
+      "rank": 5,
+      "feature": "num_derogatory_marks",
+      "label": "Severe Delinquency (90+ days, count)",
+      "mean_absolute_shap": 0.34941
+    },
+    {
+      "rank": 6,
+      "feature": "num_late_payments",
+      "label": "Mild Late Payments (30-59 days, count)",
+      "mean_absolute_shap": 0.32547
+    },
+    {
+      "rank": 7,
+      "feature": "num_credit_lines",
+      "label": "Open Credit Lines",
+      "mean_absolute_shap": 0.18738
+    },
+    {
+      "rank": 8,
+      "feature": "home_ownership",
+      "label": "Home Ownership",
+      "mean_absolute_shap": 0.13766
+    },
+    {
+      "rank": 9,
+      "feature": "employment_years",
+      "label": "Employment History (years)",
+      "mean_absolute_shap": 0.11719
+    },
+    {
+      "rank": 10,
+      "feature": "annual_income",
+      "label": "Annual Income",
+      "mean_absolute_shap": 0.09233
+    },
+    {
+      "rank": 11,
+      "feature": "credit_score",
+      "label": "Credit Score",
+      "mean_absolute_shap": 0.08944
+    },
+    {
+      "rank": 12,
+      "feature": "monthly_expenses",
+      "label": "Monthly Expenses",
+      "mean_absolute_shap": 0.07749
+    },
+    {
+      "rank": 13,
+      "feature": "dti_ratio",
+      "label": "Debt-to-Income Ratio",
+      "mean_absolute_shap": 0.05864
+    },
+    {
+      "rank": 14,
+      "feature": "loan_amount",
+      "label": "Loan Amount",
+      "mean_absolute_shap": 0.0532
+    },
+    {
+      "rank": 15,
+      "feature": "savings_balance",
+      "label": "Savings Balance",
+      "mean_absolute_shap": 0.02805
+    }
+  ],
+  "example_local_explanation": {
+    "applicant_index": 0,
+    "base_value": -0.5036,
+    "top_drivers": [
+      {
+        "feature": "num_derogatory_marks",
+        "label": "Severe Delinquency (90+ days, count)",
+        "raw_value": 0.0,
+        "shap_value": -0.4538,
+        "abs_impact": 0.4538,
+        "direction": "negative"
+      },
+      {
+        "feature": "credit_utilization",
+        "label": "Credit Utilization",
+        "raw_value": 0.1782,
+        "shap_value": -0.4418,
+        "abs_impact": 0.4418,
+        "direction": "negative"
+      },
+      {
+        "feature": "loan_term",
+        "label": "Loan Term (months)",
+        "raw_value": 360.0,
+        "shap_value": -0.4399,
+        "abs_impact": 0.4399,
+        "direction": "negative"
+      },
+      {
+        "feature": "purpose_encoded",
+        "label": "Loan Purpose",
+        "raw_value": 3.0,
+        "shap_value": -0.43,
+        "abs_impact": 0.43,
+        "direction": "negative"
+      },
+      {
+        "feature": "num_late_payments",
+        "label": "Mild Late Payments (30-59 days, count)",
+        "raw_value": 1.0,
+        "shap_value": -0.3164,
+        "abs_impact": 0.3164,
+        "direction": "negative"
+      }
+    ],
+    "plain_english_summary": [
+      "0 derogatory mark(s) on your record negatively affect your application.",
+      "Credit utilization of 18% is high \u2014 aim to keep it below 30%.",
+      "1 late payment(s) in the last 12 months is a red flag for lenders."
+    ]
+  }
+}

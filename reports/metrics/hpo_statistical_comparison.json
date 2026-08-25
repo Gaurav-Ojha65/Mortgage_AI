@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "analysis_type": "paired_bootstrap_uncertainty_analysis",
+    "eval_dataset": "data/test.csv",
+    "sample_size": 21398,
+    "n_bootstraps": 1000,
+    "random_seed": 42,
+    "timestamp": "2026-08-24T22:19:32Z"
+  },
+  "point_estimates": {
+    "roc_auc": {
+      "baseline_v3": 0.8599,
+      "candidate_v3_1": 0.8615,
+      "point_delta": 0.0017
+    },
+    "pr_auc": {
+      "baseline_v3": 0.3947,
+      "candidate_v3_1": 0.3995,
+      "point_delta": 0.0048
+    },
+    "brier_score": {
+      "baseline_v3": 0.0494,
+      "candidate_v3_1": 0.0492,
+      "point_delta": -0.0003
+    },
+    "weighted_ece": {
+      "baseline_v3": 0.0018,
+      "candidate_v3_1": 0.0012,
+      "point_delta": -0.0006
+    },
+    "total_expected_cost": {
+      "baseline_v3": 4082900.0,
+      "candidate_v3_1": 4062100.0,
+      "point_delta": -20800.0
+    },
+    "cost_per_applicant": {
+      "baseline_v3": 190.81,
+      "candidate_v3_1": 189.84,
+      "point_delta": -0.97
+    }
+  },
+  "paired_difference_95_ci": {
+    "delta_roc_auc": {
+      "ci_95_lower": 0.0002,
+      "ci_95_upper": 0.0032,
+      "bootstrap_mean": 0.0017,
+      "bootstrap_std": 0.0008,
+      "includes_zero": false
+    },
+    "delta_pr_auc": {
+      "ci_95_lower": -0.0011,
+      "ci_95_upper": 0.0104,
+      "bootstrap_mean": 0.0049,
+      "bootstrap_std": 0.0029,
+      "includes_zero": true
+    },
+    "delta_brier_score": {
+      "ci_95_lower": -0.0005,
+      "ci_95_upper": -0.0001,
+      "bootstrap_mean": -0.0003,
+      "bootstrap_std": 0.0001,
+      "includes_zero": false
+    },
+    "delta_weighted_ece": {
+      "ci_95_lower": -0.0017,
+      "ci_95_upper": 0.0017,
+      "bootstrap_mean": -0.0001,
+      "bootstrap_std": 0.0009,
+      "includes_zero": true
+    },
+    "delta_total_expected_cost": {
+      "ci_95_lower": -153881.25,
+      "ci_95_upper": 109023.75,
+      "bootstrap_mean": -21466.85,
+      "bootstrap_std": 67654.7,
+      "includes_zero": true
+    },
+    "delta_cost_per_applicant": {
+      "ci_95_lower": -7.19,
+      "ci_95_upper": 5.1,
+      "bootstrap_mean": -1.0,
+      "bootstrap_std": 3.16,
+      "includes_zero": true
+    }
+  },
+  "statistical_interpretation": {
+    "roc_auc_significant": true,
+    "pr_auc_significant": false,
+    "brier_significant": true,
+    "wece_significant": false,
+    "cost_significant": false,
+    "summary_statement": "95% CI for Delta ROC-AUC: [0.0002, 0.0032]. 95% CI for Delta PR-AUC: [-0.0011, 0.0104]. 95% CI for Delta Total Cost: [$-153,881.25, $109,023.75]. Point estimates show improvement across all metrics; interval analysis reveals the degree of statistical overlap."
+  }
+}

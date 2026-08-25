@@ -1,0 +1,248 @@
+{
+  "timestamp": "2026-08-24T16:09:03.154676",
+  "dataset": {
+    "test_sample_size": 21398,
+    "test_default_prevalence": 0.0676
+  },
+  "cost_model": {
+    "cost_fn": 10000.0,
+    "cost_fp": 1000.0,
+    "cost_manual_review": 150.0,
+    "is_demonstration": true
+  },
+  "baseline_system": {
+    "name": "LightGBM + Val-Fitted Isotonic Calibrator + Val-Optimized Policy",
+    "calibration_sample_size": 21398,
+    "test_metrics": {
+      "roc_auc": 0.86,
+      "pr_auc": 0.3834,
+      "brier_score": 0.0495,
+      "ece_weighted": 0.0012,
+      "macro_ece": 0.0105
+    },
+    "test_policies": {
+      "f1_optimal": {
+        "policy_name": "Baseline F1-Optimal (theta=0.155)",
+        "thresholds": "theta = 0.155",
+        "precision": 0.4019,
+        "recall": 0.5041,
+        "specificity": 0.9456,
+        "f1": 0.4472,
+        "fpr": 0.0544,
+        "fnr": 0.4959,
+        "accuracy": 0.9158,
+        "cost_per_applicant": 385.78,
+        "total_expected_cost": 8255000.0,
+        "distribution": {
+          "approved": 19584,
+          "approved_pct": 0.9152,
+          "reviewed": 0,
+          "reviewed_pct": 0.0,
+          "rejected": 1814,
+          "rejected_pct": 0.0848
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 7170000.0,
+          "approved_defaults_count": 717,
+          "rejected_good_borrower_loss": 1085000.0,
+          "rejected_good_count": 1085,
+          "manual_review_cost": 0.0,
+          "manual_review_count": 0
+        }
+      },
+      "three_tier_economic": {
+        "policy_name": "Baseline 3-Tier (0.060/0.330)",
+        "thresholds": "Approve <= 0.060, Reject >= 0.330",
+        "precision": 0.2191,
+        "recall": 0.7462,
+        "specificity": 0.8073,
+        "f1": 0.3388,
+        "fpr": 0.1927,
+        "fnr": 0.2538,
+        "accuracy": 0.8032,
+        "cost_per_applicant": 220.89,
+        "total_expected_cost": 4726550.0,
+        "distribution": {
+          "approved": 16474,
+          "approved_pct": 0.7699,
+          "reviewed": 3957,
+          "reviewed_pct": 0.1849,
+          "rejected": 967,
+          "rejected_pct": 0.0452
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 3670000.0,
+          "approved_defaults_count": 367,
+          "rejected_good_borrower_loss": 463000.0,
+          "rejected_good_count": 463,
+          "manual_review_cost": 593550.0,
+          "manual_review_count": 3957
+        }
+      }
+    }
+  },
+  "oof_calibrated_system": {
+    "name": "LightGBM + OOF-Fitted Isotonic Calibrator + Val-Optimized Policy",
+    "calibration_sample_size": 99856,
+    "test_metrics": {
+      "roc_auc": 0.8599,
+      "pr_auc": 0.3947,
+      "brier_score": 0.0494,
+      "ece_weighted": 0.0018,
+      "macro_ece": 0.0353
+    },
+    "test_policies": {
+      "f1_optimal": {
+        "policy_name": "1. OOF F1-Optimal (theta=0.220)",
+        "thresholds": "theta = 0.220",
+        "precision": 0.4042,
+        "recall": 0.4917,
+        "specificity": 0.9475,
+        "f1": 0.4437,
+        "fpr": 0.0525,
+        "fnr": 0.5083,
+        "accuracy": 0.9167,
+        "cost_per_applicant": 392.47,
+        "total_expected_cost": 8398000.0,
+        "distribution": {
+          "approved": 19639,
+          "approved_pct": 0.9178,
+          "reviewed": 0,
+          "reviewed_pct": 0.0,
+          "rejected": 1759,
+          "rejected_pct": 0.0822
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 7350000.0,
+          "approved_defaults_count": 735,
+          "rejected_good_borrower_loss": 1048000.0,
+          "rejected_good_count": 1048,
+          "manual_review_cost": 0.0,
+          "manual_review_count": 0
+        }
+      },
+      "balanced_accuracy": {
+        "policy_name": "2. OOF Balanced Acc (theta=0.075)",
+        "thresholds": "theta = 0.075",
+        "precision": 0.2188,
+        "recall": 0.7462,
+        "specificity": 0.8069,
+        "f1": 0.3384,
+        "fpr": 0.1931,
+        "fnr": 0.2538,
+        "accuracy": 0.8028,
+        "cost_per_applicant": 351.53,
+        "total_expected_cost": 7522000.0,
+        "distribution": {
+          "approved": 16467,
+          "approved_pct": 0.7696,
+          "reviewed": 0,
+          "reviewed_pct": 0.0,
+          "rejected": 4931,
+          "rejected_pct": 0.2304
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 3670000.0,
+          "approved_defaults_count": 367,
+          "rejected_good_borrower_loss": 3852000.0,
+          "rejected_good_count": 3852,
+          "manual_review_cost": 0.0,
+          "manual_review_count": 0
+        }
+      },
+      "cost_sensitive_10_1": {
+        "policy_name": "3. OOF Cost-Sensitive 10:1 (theta=0.085)",
+        "thresholds": "theta = 0.085",
+        "precision": 0.2305,
+        "recall": 0.7261,
+        "specificity": 0.8243,
+        "f1": 0.3499,
+        "fpr": 0.1757,
+        "fnr": 0.2739,
+        "accuracy": 0.8177,
+        "cost_per_applicant": 348.86,
+        "total_expected_cost": 7465000.0,
+        "distribution": {
+          "approved": 16843,
+          "approved_pct": 0.7871,
+          "reviewed": 0,
+          "reviewed_pct": 0.0,
+          "rejected": 4555,
+          "rejected_pct": 0.2129
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 3960000.0,
+          "approved_defaults_count": 396,
+          "rejected_good_borrower_loss": 3505000.0,
+          "rejected_good_count": 3505,
+          "manual_review_cost": 0.0,
+          "manual_review_count": 0
+        }
+      },
+      "cost_sensitive_5_1": {
+        "policy_name": "4. OOF Cost-Sensitive 5:1 (theta=0.185)",
+        "thresholds": "theta = 0.185",
+        "precision": 0.3901,
+        "recall": 0.5194,
+        "specificity": 0.9412,
+        "f1": 0.4456,
+        "fpr": 0.0588,
+        "fnr": 0.4806,
+        "accuracy": 0.9127,
+        "cost_per_applicant": 379.66,
+        "total_expected_cost": 8124000.0,
+        "distribution": {
+          "approved": 19473,
+          "approved_pct": 0.91,
+          "reviewed": 0,
+          "reviewed_pct": 0.0,
+          "rejected": 1925,
+          "rejected_pct": 0.09
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 6950000.0,
+          "approved_defaults_count": 695,
+          "rejected_good_borrower_loss": 1174000.0,
+          "rejected_good_count": 1174,
+          "manual_review_cost": 0.0,
+          "manual_review_count": 0
+        }
+      },
+      "three_tier_economic": {
+        "policy_name": "5. OOF 3-Tier (0.055/0.405)",
+        "thresholds": "Approve <= 0.055, Reject >= 0.405",
+        "precision": 0.1937,
+        "recall": 0.7911,
+        "specificity": 0.7614,
+        "f1": 0.3113,
+        "fpr": 0.2386,
+        "fnr": 0.2089,
+        "accuracy": 0.7634,
+        "cost_per_applicant": 190.81,
+        "total_expected_cost": 4082900.0,
+        "distribution": {
+          "approved": 15493,
+          "approved_pct": 0.724,
+          "reviewed": 5266,
+          "reviewed_pct": 0.2461,
+          "rejected": 639,
+          "rejected_pct": 0.0299
+        },
+        "cost_breakdown": {
+          "approved_default_loss": 3020000.0,
+          "approved_defaults_count": 302,
+          "rejected_good_borrower_loss": 273000.0,
+          "rejected_good_count": 273,
+          "manual_review_cost": 789900.0,
+          "manual_review_count": 5266
+        }
+      }
+    },
+    "economic_summary": {
+      "f1_optimal_cost": 8398000.0,
+      "three_tier_cost": 4082900.0,
+      "total_savings": 4315100.0,
+      "cost_reduction_pct": 51.38
+    }
+  }
+}

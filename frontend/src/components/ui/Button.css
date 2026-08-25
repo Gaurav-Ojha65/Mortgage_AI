@@ -1,0 +1,65 @@
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.ui-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Primary (Gold) */
+.ui-btn.variant-primary {
+  background-color: var(--gold);
+  color: var(--bg);
+  box-shadow: 0 4px 10px rgba(232, 160, 32, 0.2);
+}
+
+.ui-btn.variant-primary:hover:not(:disabled) {
+  background-color: var(--gold-hover);
+  box-shadow: 0 6px 15px rgba(232, 160, 32, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Secondary (Outline) */
+.ui-btn.variant-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.ui-btn.variant-secondary:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Ghost (Text only) */
+.ui-btn.variant-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+}
+
+.ui-btn.variant-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Spinner */
+.ui-btn .spinner svg {
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+}
+
+.ui-btn .opacity-25 { opacity: 0.25; }
+.ui-btn .opacity-75 { opacity: 0.75; }

@@ -1,0 +1,602 @@
+{
+  "evaluation_timestamp": "2026-08-24T14:52:24.064746",
+  "seed": 42,
+  "dataset": {
+    "test_size": 21398,
+    "default_rate": 0.0676
+  },
+  "models": {
+    "logisticregression": {
+      "accuracy": 0.9196,
+      "precision": 0.4161,
+      "recall": 0.4716,
+      "f1": 0.4421,
+      "specificity": 0.952,
+      "roc_auc": 0.8589,
+      "pr_auc": 0.3938,
+      "brier_score": 0.089,
+      "threshold": 0.65,
+      "confusion_matrix": {
+        "tn": 18995,
+        "fp": 957,
+        "fn": 764,
+        "tp": 682
+      },
+      "support": {
+        "total": 21398,
+        "positives": 1446,
+        "default_rate": 0.0676
+      },
+      "cv_auc_mean": 0.8822,
+      "cv_auc_std": 0.0012,
+      "cv_n_splits": 5,
+      "calibration": {
+        "ece": 0.1569,
+        "macro_ece": 0.3109,
+        "n_bins": 10,
+        "n_non_empty_bins": 10,
+        "fraction_of_positives": [
+          0.0082,
+          0.0293,
+          0.0592,
+          0.0758,
+          0.1269,
+          0.1724,
+          0.2426,
+          0.2701,
+          0.3567,
+          0.5597
+        ],
+        "mean_predicted_value": [
+          0.0706,
+          0.1395,
+          0.2458,
+          0.3468,
+          0.4466,
+          0.5452,
+          0.6502,
+          0.7492,
+          0.8513,
+          0.9651
+        ],
+        "bin_details": [
+          {
+            "bin": 1,
+            "range": "[0.0, 0.1)",
+            "count": 8576,
+            "pct": 0.4008,
+            "p_mean": 0.0706,
+            "o_mean": 0.0082,
+            "abs_diff": 0.0624
+          },
+          {
+            "bin": 2,
+            "range": "[0.1, 0.2)",
+            "count": 5427,
+            "pct": 0.2536,
+            "p_mean": 0.1395,
+            "o_mean": 0.0293,
+            "abs_diff": 0.1102
+          },
+          {
+            "bin": 3,
+            "range": "[0.2, 0.3)",
+            "count": 2212,
+            "pct": 0.1034,
+            "p_mean": 0.2458,
+            "o_mean": 0.0592,
+            "abs_diff": 0.1866
+          },
+          {
+            "bin": 4,
+            "range": "[0.3, 0.4)",
+            "count": 1768,
+            "pct": 0.0826,
+            "p_mean": 0.3468,
+            "o_mean": 0.0758,
+            "abs_diff": 0.271
+          },
+          {
+            "bin": 5,
+            "range": "[0.4, 0.5)",
+            "count": 1064,
+            "pct": 0.0497,
+            "p_mean": 0.4466,
+            "o_mean": 0.1269,
+            "abs_diff": 0.3197
+          },
+          {
+            "bin": 6,
+            "range": "[0.5, 0.6)",
+            "count": 522,
+            "pct": 0.0244,
+            "p_mean": 0.5452,
+            "o_mean": 0.1724,
+            "abs_diff": 0.3728
+          },
+          {
+            "bin": 7,
+            "range": "[0.6, 0.7)",
+            "count": 408,
+            "pct": 0.0191,
+            "p_mean": 0.6502,
+            "o_mean": 0.2426,
+            "abs_diff": 0.4076
+          },
+          {
+            "bin": 8,
+            "range": "[0.7, 0.8)",
+            "count": 348,
+            "pct": 0.0163,
+            "p_mean": 0.7492,
+            "o_mean": 0.2701,
+            "abs_diff": 0.4791
+          },
+          {
+            "bin": 9,
+            "range": "[0.8, 0.9)",
+            "count": 328,
+            "pct": 0.0153,
+            "p_mean": 0.8513,
+            "o_mean": 0.3567,
+            "abs_diff": 0.4946
+          },
+          {
+            "bin": 10,
+            "range": "[0.9, 1.0]",
+            "count": 745,
+            "pct": 0.0348,
+            "p_mean": 0.9651,
+            "o_mean": 0.5597,
+            "abs_diff": 0.4054
+          }
+        ],
+        "calibration_note": "ECE (Expected Calibration Error) is the standard sample-weighted average across all bins. Lower is better; 0.0 = perfect calibration."
+      }
+    },
+    "xgboost": {
+      "accuracy": 0.9185,
+      "precision": 0.412,
+      "recall": 0.4806,
+      "f1": 0.4437,
+      "specificity": 0.9503,
+      "roc_auc": 0.8592,
+      "pr_auc": 0.4041,
+      "brier_score": 0.055,
+      "threshold": 0.4,
+      "confusion_matrix": {
+        "tn": 18960,
+        "fp": 992,
+        "fn": 751,
+        "tp": 695
+      },
+      "support": {
+        "total": 21398,
+        "positives": 1446,
+        "default_rate": 0.0676
+      },
+      "cv_auc_mean": 0.9754,
+      "cv_auc_std": 0.0007,
+      "cv_n_splits": 5,
+      "calibration": {
+        "ece": 0.0527,
+        "macro_ece": 0.1343,
+        "n_bins": 10,
+        "n_non_empty_bins": 10,
+        "fraction_of_positives": [
+          0.0169,
+          0.0655,
+          0.1311,
+          0.1983,
+          0.2783,
+          0.2865,
+          0.4752,
+          0.5928,
+          0.6691,
+          0.8571
+        ],
+        "mean_predicted_value": [
+          0.0389,
+          0.1423,
+          0.242,
+          0.3482,
+          0.4471,
+          0.5485,
+          0.6515,
+          0.7492,
+          0.8402,
+          0.9063
+        ],
+        "bin_details": [
+          {
+            "bin": 1,
+            "range": "[0.0, 0.1)",
+            "count": 14405,
+            "pct": 0.6732,
+            "p_mean": 0.0389,
+            "o_mean": 0.0169,
+            "abs_diff": 0.022
+          },
+          {
+            "bin": 2,
+            "range": "[0.1, 0.2)",
+            "count": 3496,
+            "pct": 0.1634,
+            "p_mean": 0.1423,
+            "o_mean": 0.0655,
+            "abs_diff": 0.0768
+          },
+          {
+            "bin": 3,
+            "range": "[0.2, 0.3)",
+            "count": 1205,
+            "pct": 0.0563,
+            "p_mean": 0.242,
+            "o_mean": 0.1311,
+            "abs_diff": 0.1109
+          },
+          {
+            "bin": 4,
+            "range": "[0.3, 0.4)",
+            "count": 605,
+            "pct": 0.0283,
+            "p_mean": 0.3482,
+            "o_mean": 0.1983,
+            "abs_diff": 0.1498
+          },
+          {
+            "bin": 5,
+            "range": "[0.4, 0.5)",
+            "count": 521,
+            "pct": 0.0243,
+            "p_mean": 0.4471,
+            "o_mean": 0.2783,
+            "abs_diff": 0.1687
+          },
+          {
+            "bin": 6,
+            "range": "[0.5, 0.6)",
+            "count": 370,
+            "pct": 0.0173,
+            "p_mean": 0.5485,
+            "o_mean": 0.2865,
+            "abs_diff": 0.2621
+          },
+          {
+            "bin": 7,
+            "range": "[0.6, 0.7)",
+            "count": 343,
+            "pct": 0.016,
+            "p_mean": 0.6515,
+            "o_mean": 0.4752,
+            "abs_diff": 0.1762
+          },
+          {
+            "bin": 8,
+            "range": "[0.7, 0.8)",
+            "count": 307,
+            "pct": 0.0143,
+            "p_mean": 0.7492,
+            "o_mean": 0.5928,
+            "abs_diff": 0.1564
+          },
+          {
+            "bin": 9,
+            "range": "[0.8, 0.9)",
+            "count": 139,
+            "pct": 0.0065,
+            "p_mean": 0.8402,
+            "o_mean": 0.6691,
+            "abs_diff": 0.1711
+          },
+          {
+            "bin": 10,
+            "range": "[0.9, 1.0]",
+            "count": 7,
+            "pct": 0.0003,
+            "p_mean": 0.9063,
+            "o_mean": 0.8571,
+            "abs_diff": 0.0492
+          }
+        ],
+        "calibration_note": "ECE (Expected Calibration Error) is the standard sample-weighted average across all bins. Lower is better; 0.0 = perfect calibration."
+      }
+    },
+    "lightgbm": {
+      "accuracy": 0.9165,
+      "precision": 0.4044,
+      "recall": 0.4972,
+      "f1": 0.446,
+      "specificity": 0.9469,
+      "roc_auc": 0.8601,
+      "pr_auc": 0.4041,
+      "brier_score": 0.0495,
+      "threshold": 0.23,
+      "confusion_matrix": {
+        "tn": 18893,
+        "fp": 1059,
+        "fn": 727,
+        "tp": 719
+      },
+      "support": {
+        "total": 21398,
+        "positives": 1446,
+        "default_rate": 0.0676
+      },
+      "cv_auc_mean": 0.9757,
+      "cv_auc_std": 0.0005,
+      "cv_n_splits": 5,
+      "calibration": {
+        "ece": 0.0068,
+        "macro_ece": 0.0197,
+        "n_bins": 10,
+        "n_non_empty_bins": 9,
+        "fraction_of_positives": [
+          0.0257,
+          0.1227,
+          0.2454,
+          0.2933,
+          0.4383,
+          0.5137,
+          0.6138,
+          0.7403,
+          0.8182
+        ],
+        "mean_predicted_value": [
+          0.0299,
+          0.1373,
+          0.247,
+          0.3463,
+          0.4473,
+          0.5512,
+          0.6456,
+          0.7454,
+          0.8383
+        ],
+        "bin_details": [
+          {
+            "bin": 1,
+            "range": "[0.0, 0.1)",
+            "count": 17526,
+            "pct": 0.819,
+            "p_mean": 0.0299,
+            "o_mean": 0.0257,
+            "abs_diff": 0.0042
+          },
+          {
+            "bin": 2,
+            "range": "[0.1, 0.2)",
+            "count": 1850,
+            "pct": 0.0865,
+            "p_mean": 0.1373,
+            "o_mean": 0.1227,
+            "abs_diff": 0.0146
+          },
+          {
+            "bin": 3,
+            "range": "[0.2, 0.3)",
+            "count": 705,
+            "pct": 0.0329,
+            "p_mean": 0.247,
+            "o_mean": 0.2454,
+            "abs_diff": 0.0016
+          },
+          {
+            "bin": 4,
+            "range": "[0.3, 0.4)",
+            "count": 450,
+            "pct": 0.021,
+            "p_mean": 0.3463,
+            "o_mean": 0.2933,
+            "abs_diff": 0.053
+          },
+          {
+            "bin": 5,
+            "range": "[0.4, 0.5)",
+            "count": 324,
+            "pct": 0.0151,
+            "p_mean": 0.4473,
+            "o_mean": 0.4383,
+            "abs_diff": 0.009
+          },
+          {
+            "bin": 6,
+            "range": "[0.5, 0.6)",
+            "count": 255,
+            "pct": 0.0119,
+            "p_mean": 0.5512,
+            "o_mean": 0.5137,
+            "abs_diff": 0.0374
+          },
+          {
+            "bin": 7,
+            "range": "[0.6, 0.7)",
+            "count": 189,
+            "pct": 0.0088,
+            "p_mean": 0.6456,
+            "o_mean": 0.6138,
+            "abs_diff": 0.0319
+          },
+          {
+            "bin": 8,
+            "range": "[0.7, 0.8)",
+            "count": 77,
+            "pct": 0.0036,
+            "p_mean": 0.7454,
+            "o_mean": 0.7403,
+            "abs_diff": 0.0051
+          },
+          {
+            "bin": 9,
+            "range": "[0.8, 0.9)",
+            "count": 22,
+            "pct": 0.001,
+            "p_mean": 0.8383,
+            "o_mean": 0.8182,
+            "abs_diff": 0.0201
+          },
+          {
+            "bin": 10,
+            "range": "[0.9, 1.0]",
+            "count": 0,
+            "pct": 0.0,
+            "p_mean": null,
+            "o_mean": null,
+            "abs_diff": null
+          }
+        ],
+        "calibration_note": "ECE (Expected Calibration Error) is the standard sample-weighted average across all bins. Lower is better; 0.0 = perfect calibration."
+      }
+    },
+    "ensemble": {
+      "accuracy": 0.9226,
+      "precision": 0.431,
+      "recall": 0.4537,
+      "f1": 0.442,
+      "specificity": 0.9566,
+      "roc_auc": 0.8589,
+      "pr_auc": 0.4005,
+      "brier_score": 0.0518,
+      "threshold": 0.2,
+      "confusion_matrix": {
+        "tn": 19086,
+        "fp": 866,
+        "fn": 790,
+        "tp": 656
+      },
+      "support": {
+        "total": 21398,
+        "positives": 1446,
+        "default_rate": 0.0676
+      },
+      "cv_auc_mean": 0.976,
+      "cv_auc_std": 0.0005,
+      "cv_n_splits": 5,
+      "calibration": {
+        "ece": 0.0122,
+        "macro_ece": 0.1262,
+        "n_bins": 10,
+        "n_non_empty_bins": 10,
+        "fraction_of_positives": [
+          0.0328,
+          0.2073,
+          0.2941,
+          0.2554,
+          0.4359,
+          0.4058,
+          0.5103,
+          0.5031,
+          0.6175,
+          0.6644
+        ],
+        "mean_predicted_value": [
+          0.0329,
+          0.1418,
+          0.2455,
+          0.3437,
+          0.4472,
+          0.5512,
+          0.6533,
+          0.7501,
+          0.8542,
+          0.9407
+        ],
+        "bin_details": [
+          {
+            "bin": 1,
+            "range": "[0.0, 0.1)",
+            "count": 19080,
+            "pct": 0.8917,
+            "p_mean": 0.0329,
+            "o_mean": 0.0328,
+            "abs_diff": 0.0002
+          },
+          {
+            "bin": 2,
+            "range": "[0.1, 0.2)",
+            "count": 796,
+            "pct": 0.0372,
+            "p_mean": 0.1418,
+            "o_mean": 0.2073,
+            "abs_diff": 0.0655
+          },
+          {
+            "bin": 3,
+            "range": "[0.2, 0.3)",
+            "count": 357,
+            "pct": 0.0167,
+            "p_mean": 0.2455,
+            "o_mean": 0.2941,
+            "abs_diff": 0.0486
+          },
+          {
+            "bin": 4,
+            "range": "[0.3, 0.4)",
+            "count": 231,
+            "pct": 0.0108,
+            "p_mean": 0.3437,
+            "o_mean": 0.2554,
+            "abs_diff": 0.0883
+          },
+          {
+            "bin": 5,
+            "range": "[0.4, 0.5)",
+            "count": 156,
+            "pct": 0.0073,
+            "p_mean": 0.4472,
+            "o_mean": 0.4359,
+            "abs_diff": 0.0113
+          },
+          {
+            "bin": 6,
+            "range": "[0.5, 0.6)",
+            "count": 138,
+            "pct": 0.0064,
+            "p_mean": 0.5512,
+            "o_mean": 0.4058,
+            "abs_diff": 0.1454
+          },
+          {
+            "bin": 7,
+            "range": "[0.6, 0.7)",
+            "count": 145,
+            "pct": 0.0068,
+            "p_mean": 0.6533,
+            "o_mean": 0.5103,
+            "abs_diff": 0.143
+          },
+          {
+            "bin": 8,
+            "range": "[0.7, 0.8)",
+            "count": 163,
+            "pct": 0.0076,
+            "p_mean": 0.7501,
+            "o_mean": 0.5031,
+            "abs_diff": 0.247
+          },
+          {
+            "bin": 9,
+            "range": "[0.8, 0.9)",
+            "count": 183,
+            "pct": 0.0086,
+            "p_mean": 0.8542,
+            "o_mean": 0.6175,
+            "abs_diff": 0.2367
+          },
+          {
+            "bin": 10,
+            "range": "[0.9, 1.0]",
+            "count": 149,
+            "pct": 0.007,
+            "p_mean": 0.9407,
+            "o_mean": 0.6644,
+            "abs_diff": 0.2763
+          }
+        ],
+        "calibration_note": "ECE (Expected Calibration Error) is the standard sample-weighted average across all bins. Lower is better; 0.0 = perfect calibration."
+      }
+    }
+  },
+  "best_model_by_roc_auc": "lightgbm",
+  "methodology_note": "Metrics are computed on a held-out test set (20% of total data). CV-AUC is computed via 5-fold StratifiedKFold on train+val combined. Optimal threshold is selected by maximizing F1 on the validation set, then applied to the test set. All results are reproducible with the specified seed."
+}

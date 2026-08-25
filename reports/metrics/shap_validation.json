@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "validation_name": "shap_explainability_audit",
+    "model_path": "ml\\models\\lightgbm.joblib",
+    "test_sample_size": 21398,
+    "explainer_type": "shap.TreeExplainer",
+    "explanation_target": "LightGBM raw margin (log-odds default score)"
+  },
+  "feature_schema_audit": {
+    "expected_feature_count": 15,
+    "model_feature_count": 15,
+    "feature_order_exact_match": true,
+    "obsolete_feature_detected (payment_history_score)": false,
+    "active_feature_present (late_payment_severity_score)": true,
+    "ordered_features": [
+      "credit_score",
+      "annual_income",
+      "loan_amount",
+      "loan_term",
+      "dti_ratio",
+      "employment_years",
+      "num_credit_lines",
+      "num_derogatory_marks",
+      "credit_utilization",
+      "late_payment_severity_score",
+      "home_ownership",
+      "purpose_encoded",
+      "num_late_payments",
+      "savings_balance",
+      "monthly_expenses"
+    ]
+  },
+  "mathematical_additivity_check": {
+    "is_additive": true,
+    "expected_value_base": -0.52241,
+    "sample_records_tested": 100,
+    "max_absolute_reconstruction_error": 1.1546319456101628e-14,
+    "mean_absolute_reconstruction_error": 3.74950070991531e-15,
+    "formula": "raw_margin = base_value + sum(shap_values)"
+  },
+  "architectural_separation": {
+    "model_explanation": "Explains why LightGBM generated raw risk score from features (via SHAP log-odds).",
+    "calibrator_explanation": "Isotonic regression mapping raw probability to empirical risk (unaltered by SHAP).",
+    "policy_explanation": "3-tier economic cost optimization routing probability to APPROVE/MANUAL_REVIEW/REJECT.",
+    "regulatory_disclaimer": "SHAP feature attributions describe algorithmic score inputs and do not constitute statutory adverse action notices or legal justifications."
+  },
+  "global_feature_importance_top_10": [
+    {
+      "feature": "late_payment_severity_score",
+      "label": "Late Payment Severity Score (0=worst, 1=perfect)",
+      "mean_absolute_shap": 1.1049
+    },
+    {
+      "feature": "credit_utilization",
+      "label": "Credit Utilization",
+      "mean_absolute_shap": 0.57957
+    },
+    {
+      "feature": "loan_term",
+      "label": "Loan Term (months)",
+      "mean_absolute_shap": 0.56178
+    },
+    {
+      "feature": "purpose_encoded",
+      "label": "Loan Purpose",
+      "mean_absolute_shap": 0.51172
+    },
+    {
+      "feature": "num_derogatory_marks",
+      "label": "Severe Delinquency (90+ days, count)",
+      "mean_absolute_shap": 0.36597
+    },
+    {
+      "feature": "num_late_payments",
+      "label": "Mild Late Payments (30-59 days, count)",
+      "mean_absolute_shap": 0.26181
+    },
+    {
+      "feature": "num_credit_lines",
+      "label": "Open Credit Lines",
+      "mean_absolute_shap": 0.16947
+    },
+    {
+      "feature": "home_ownership",
+      "label": "Home Ownership",
+      "mean_absolute_shap": 0.14493
+    },
+    {
+      "feature": "employment_years",
+      "label": "Employment History (years)",
+      "mean_absolute_shap": 0.11475
+    },
+    {
+      "feature": "annual_income",
+      "label": "Annual Income",
+      "mean_absolute_shap": 0.09228
+    }
+  ],
+  "global_feature_importance_all": [
+    {
+      "feature": "late_payment_severity_score",
+      "label": "Late Payment Severity Score (0=worst, 1=perfect)",
+      "mean_absolute_shap": 1.1049
+    },
+    {
+      "feature": "credit_utilization",
+      "label": "Credit Utilization",
+      "mean_absolute_shap": 0.57957
+    },
+    {
+      "feature": "loan_term",
+      "label": "Loan Term (months)",
+      "mean_absolute_shap": 0.56178
+    },
+    {
+      "feature": "purpose_encoded",
+      "label": "Loan Purpose",
+      "mean_absolute_shap": 0.51172
+    },
+    {
+      "feature": "num_derogatory_marks",
+      "label": "Severe Delinquency (90+ days, count)",
+      "mean_absolute_shap": 0.36597
+    },
+    {
+      "feature": "num_late_payments",
+      "label": "Mild Late Payments (30-59 days, count)",
+      "mean_absolute_shap": 0.26181
+    },
+    {
+      "feature": "num_credit_lines",
+      "label": "Open Credit Lines",
+      "mean_absolute_shap": 0.16947
+    },
+    {
+      "feature": "home_ownership",
+      "label": "Home Ownership",
+      "mean_absolute_shap": 0.14493
+    },
+    {
+      "feature": "employment_years",
+      "label": "Employment History (years)",
+      "mean_absolute_shap": 0.11475
+    },
+    {
+      "feature": "annual_income",
+      "label": "Annual Income",
+      "mean_absolute_shap": 0.09228
+    },
+    {
+      "feature": "monthly_expenses",
+      "label": "Monthly Expenses",
+      "mean_absolute_shap": 0.07997
+    },
+    {
+      "feature": "credit_score",
+      "label": "Credit Score",
+      "mean_absolute_shap": 0.06645
+    },
+    {
+      "feature": "dti_ratio",
+      "label": "Debt-to-Income Ratio",
+      "mean_absolute_shap": 0.05606
+    },
+    {
+      "feature": "loan_amount",
+      "label": "Loan Amount",
+      "mean_absolute_shap": 0.05383
+    },
+    {
+      "feature": "savings_balance",
+      "label": "Savings Balance",
+      "mean_absolute_shap": 0.03214
+    }
+  ],
+  "example_local_explanation": {
+    "raw_margin": -2.63072,
+    "raw_probability": 0.06719,
+    "base_value": -0.52241,
+    "top_drivers": [
+      {
+        "feature": "num_derogatory_marks",
+        "label": "Severe Delinquency (90+ days, count)",
+        "feature_value": 0.0,
+        "shap_value": -0.74347,
+        "abs_impact": 0.74347,
+        "direction": "reduces_default_risk"
+      },
+      {
+        "feature": "late_payment_severity_score",
+        "label": "Late Payment Severity Score (0=worst, 1=perfect)",
+        "feature_value": 0.9725,
+        "shap_value": 0.62305,
+        "abs_impact": 0.62305,
+        "direction": "increases_default_risk"
+      },
+      {
+        "feature": "num_late_payments",
+        "label": "Mild Late Payments (30-59 days, count)",
+        "feature_value": 1.0,
+        "shap_value": -0.6107,
+        "abs_impact": 0.6107,
+        "direction": "reduces_default_risk"
+      },
+      {
+        "feature": "purpose_encoded",
+        "label": "Loan Purpose",
+        "feature_value": 3.0,
+        "shap_value": -0.54232,
+        "abs_impact": 0.54232,
+        "direction": "reduces_default_risk"
+      },
+      {
+        "feature": "loan_term",
+        "label": "Loan Term (months)",
+        "feature_value": 360.0,
+        "shap_value": -0.48871,
+        "abs_impact": 0.48871,
+        "direction": "reduces_default_risk"
+      }
+    ]
+  }
+}

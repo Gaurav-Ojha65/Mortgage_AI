@@ -1,0 +1,151 @@
+.predict-page {
+  height: 100%;
+}
+
+.predict-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .predict-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-header {
+  margin-bottom: var(--space-xl);
+}
+
+.card-header h2 {
+  font-size: 20px;
+  margin-bottom: var(--space-xs);
+}
+
+.mb-md { margin-bottom: var(--space-md); }
+
+.form-card, .result-card {
+  min-height: 550px;
+}
+
+.empty-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 350px;
+  gap: var(--space-md);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--border);
+}
+
+.predicting-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 350px;
+  gap: var(--space-lg);
+}
+
+.scanner {
+  width: 80%;
+  height: 4px;
+  background-color: var(--border);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 20%;
+  background-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+  animation: scan 2s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(500%); }
+}
+
+.prediction-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.result-badge-container {
+  display: flex;
+  justify-content: center;
+}
+
+.decision-badge {
+  padding: 8px 24px;
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.decision-badge.approve, .decision-badge.approved { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid var(--success); }
+.decision-badge.reject, .decision-badge.rejected { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+.decision-badge.review, .decision-badge.manual-review, .decision-badge.manual_review, .decision-badge.conditional { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); }
+
+.gauge-section {
+  display: flex;
+  justify-content: center;
+}
+
+.factors-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-md);
+}
+
+.factors-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.factor-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.factor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--gold);
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

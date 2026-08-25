@@ -1,0 +1,74 @@
+{
+  "model_name": "LightGBM",
+  "model_version": "v3.1",
+  "calibration_version": "oof-iso-v3.1",
+  "policy_version": "v3.1-policy-v1",
+  "methodology": "5-Fold Stratified OOF Calibration on Real Training Split",
+  "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+  "environment": {
+    "python_version": "3.14.3",
+    "os": "Windows-11-10.0.26200-SP0",
+    "lightgbm_version": "4.6.0",
+    "scikit_learn_version": "1.8.0",
+    "joblib_version": "1.5.3"
+  },
+  "dataset_provenance": {
+    "real_train_csv_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+    "feature_schema_sha256": "1e4fb88a829079dd1d44eb13e439d2ded7c2981d9ea712dc55dffa9dbe810f32",
+    "real_train_samples": 99856,
+    "smote_train_samples": 139659,
+    "val_samples": 21398,
+    "test_samples": 21398,
+    "natural_default_prevalence": 0.0676
+  },
+  "oof_configuration": {
+    "n_splits": 5,
+    "random_seed": 42,
+    "optuna_trial_number": 47,
+    "fold_balancing": "SMOTE(0.5) applied strictly to fold-training partition",
+    "lightgbm_params": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "feature_names": [
+      "credit_score",
+      "annual_income",
+      "loan_amount",
+      "loan_term",
+      "dti_ratio",
+      "employment_years",
+      "num_credit_lines",
+      "num_derogatory_marks",
+      "credit_utilization",
+      "late_payment_severity_score",
+      "home_ownership",
+      "purpose_encoded",
+      "num_late_payments",
+      "savings_balance",
+      "monthly_expenses"
+    ]
+  },
+  "calibrator_metrics": {
+    "isotonic": {
+      "test_roc_auc": 0.8615,
+      "test_pr_auc": 0.3995,
+      "test_brier": 0.0492,
+      "test_weighted_ece": 0.0012,
+      "test_macro_ece": 0.0129
+    }
+  },
+  "saved_artifacts": {
+    "raw_base_model": "ml/models/lightgbm.joblib",
+    "oof_calibrator_isotonic": "ml/models/lightgbm_oof_calibrator_isotonic.joblib",
+    "oof_calibrator_sigmoid": "ml/models/lightgbm_oof_calibrator_sigmoid.joblib",
+    "calibrated_pipeline": "ml/models/lightgbm_calibrated_pipeline.joblib"
+  },
+  "created_at": "2026-08-24T23:26:39.185110"
+}

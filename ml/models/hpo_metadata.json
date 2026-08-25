@@ -1,0 +1,101 @@
+{
+  "model_name": "LightGBM",
+  "version": "v3.1-hpo-candidate",
+  "hyperparameters": {
+    "n_estimators": 651,
+    "learning_rate": 0.02197044655806209,
+    "max_depth": 10,
+    "num_leaves": 20,
+    "min_child_samples": 23,
+    "subsample": 0.6806192813049439,
+    "colsample_bytree": 0.5162494742147368,
+    "reg_alpha": 0.45639816275813977,
+    "reg_lambda": 1.4932419910894181e-05
+  },
+  "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+  "environment": {
+    "python_version": "3.14.3",
+    "os": "Windows-11-10.0.26200-SP0",
+    "lightgbm_version": "4.6.0",
+    "joblib_version": "1.5.3"
+  },
+  "provenance": {
+    "real_train_csv_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+    "train_csv_sha256": "abedb28b06123b71cf5c46cfc0d1f858d081940d24b3e44d359f35dc86c3b704",
+    "val_csv_sha256": "1b7137872db2c40423a48adc28bcbc652e5edbe29756ec401782f27c73c78dd3",
+    "test_csv_sha256": "0cd564fa1cd31262daf8478a82b81cf3a5c3637d3eece8a32421bc356443778e"
+  },
+  "optuna_best_trial_source": {
+    "trial_number": 47,
+    "mean_roc_auc": 0.85749,
+    "std_roc_auc": 0.00347,
+    "pr_auc": 0.39519,
+    "brier_score": 0.04992,
+    "weighted_ece": 0.0064,
+    "macro_ece": 0.0267,
+    "training_time_s": 9.57,
+    "params": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "roc_auc_delta_vs_baseline": 0.00173
+  },
+  "measured_metrics": {
+    "version": "v3.1-hpo-candidate",
+    "model_name": "LightGBM (HPO Best Candidate)",
+    "hyperparameters": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "test_metrics": {
+      "roc_auc": 0.8615,
+      "pr_auc": 0.3995,
+      "brier_score": 0.0492,
+      "weighted_ece": 0.0012,
+      "macro_ece": 0.0129
+    },
+    "frozen_policy": {
+      "policy_name": "optimized_3tier_economic_policy",
+      "approve_threshold": 0.045,
+      "reject_threshold": 0.335,
+      "approval_pct": 0.7105,
+      "review_pct": 0.2409,
+      "rejection_pct": 0.0486,
+      "approved_defaults": 277,
+      "rejected_non_defaults": 519,
+      "rejected_defaults": 522,
+      "fn_cost": 2770000.0,
+      "fp_cost": 519000.0,
+      "review_cost": 773100.0,
+      "total_expected_cost": 4062100.0,
+      "cost_per_applicant": 189.84,
+      "precision": 0.1887,
+      "recall": 0.8084,
+      "specificity": 0.7481,
+      "f1": 0.306,
+      "fpr": 0.2519,
+      "fnr": 0.1916
+    },
+    "engineering_metrics": {
+      "training_time_seconds": 6.09,
+      "oof_cv_runtime_seconds": 3569.69,
+      "inference_latency_ms_per_app": 2.643,
+      "model_artifact_size_kb": 1472.1
+    }
+  },
+  "created_at": "2026-08-24T21:47:55.985824"
+}

@@ -1,0 +1,169 @@
+{
+  "winner": "LightGBM",
+  "metrics": {
+    "LogisticRegression": {
+      "accuracy": 0.9196,
+      "roc_auc": 0.8589,
+      "pr_auc": 0.3938,
+      "brier_score": 0.089,
+      "f1": 0.4421,
+      "precision": 0.4161,
+      "recall": 0.4716,
+      "cv_auc_mean": 0.8822,
+      "cv_auc_std": 0.0012,
+      "train_time_s": 0.11,
+      "optimal_threshold": 0.65,
+      "confusion_matrix": [
+        [
+          18995,
+          957
+        ],
+        [
+          764,
+          682
+        ]
+      ]
+    },
+    "XGBoost": {
+      "accuracy": 0.9185,
+      "roc_auc": 0.8592,
+      "pr_auc": 0.4041,
+      "brier_score": 0.055,
+      "f1": 0.4437,
+      "precision": 0.412,
+      "recall": 0.4806,
+      "cv_auc_mean": 0.9754,
+      "cv_auc_std": 0.0007,
+      "train_time_s": 2.56,
+      "optimal_threshold": 0.4,
+      "confusion_matrix": [
+        [
+          18960,
+          992
+        ],
+        [
+          751,
+          695
+        ]
+      ]
+    },
+    "LightGBM": {
+      "accuracy": 0.9165,
+      "roc_auc": 0.8601,
+      "pr_auc": 0.4041,
+      "brier_score": 0.0495,
+      "f1": 0.446,
+      "precision": 0.4044,
+      "recall": 0.4972,
+      "cv_auc_mean": 0.9757,
+      "cv_auc_std": 0.0005,
+      "train_time_s": 1.78,
+      "optimal_threshold": 0.23,
+      "confusion_matrix": [
+        [
+          18893,
+          1059
+        ],
+        [
+          727,
+          719
+        ]
+      ]
+    },
+    "Ensemble": {
+      "accuracy": 0.9226,
+      "roc_auc": 0.8589,
+      "pr_auc": 0.4005,
+      "brier_score": 0.0518,
+      "f1": 0.442,
+      "precision": 0.431,
+      "recall": 0.4537,
+      "cv_auc_mean": null,
+      "cv_auc_std": null,
+      "train_time_s": 10.43,
+      "optimal_threshold": 0.2,
+      "confusion_matrix": [
+        [
+          19086,
+          866
+        ],
+        [
+          790,
+          656
+        ]
+      ],
+      "cv_note": "Skipped in training workflow (nested CV, ~3-5 min overhead). Computed by evaluate.py post-training."
+    }
+  },
+  "importance": {
+    "LogisticRegression": {
+      "credit_score": 0.03,
+      "annual_income": 5.28,
+      "loan_amount": 1.69,
+      "loan_term": 0.31,
+      "dti_ratio": 1.66,
+      "employment_years": 4.47,
+      "num_credit_lines": 5.35,
+      "num_derogatory_marks": 6.95,
+      "credit_utilization": 20.33,
+      "late_payment_severity_score": 42.22,
+      "home_ownership": 3.23,
+      "purpose_encoded": 0.75,
+      "num_late_payments": 1.28,
+      "savings_balance": 0.94,
+      "monthly_expenses": 5.51
+    },
+    "XGBoost": {
+      "credit_score": 0.5600000023841858,
+      "annual_income": 0.49000000953674316,
+      "loan_amount": 0.4300000071525574,
+      "loan_term": 3.950000047683716,
+      "dti_ratio": 0.46000000834465027,
+      "employment_years": 0.5099999904632568,
+      "num_credit_lines": 1.5099999904632568,
+      "num_derogatory_marks": 14.0,
+      "credit_utilization": 4.199999809265137,
+      "late_payment_severity_score": 37.900001525878906,
+      "home_ownership": 7.679999828338623,
+      "purpose_encoded": 9.180000305175781,
+      "num_late_payments": 18.1299991607666,
+      "savings_balance": 0.38999998569488525,
+      "monthly_expenses": 0.6299999952316284
+    },
+    "LightGBM": {
+      "credit_score": 6.58,
+      "annual_income": 6.17,
+      "loan_amount": 6.96,
+      "loan_term": 8.65,
+      "dti_ratio": 5.25,
+      "employment_years": 7.08,
+      "num_credit_lines": 9.31,
+      "num_derogatory_marks": 3.92,
+      "credit_utilization": 10.71,
+      "late_payment_severity_score": 8.85,
+      "home_ownership": 3.14,
+      "purpose_encoded": 7.18,
+      "num_late_payments": 4.27,
+      "savings_balance": 6.86,
+      "monthly_expenses": 5.06
+    }
+  },
+  "feature_names": [
+    "credit_score",
+    "annual_income",
+    "loan_amount",
+    "loan_term",
+    "dti_ratio",
+    "employment_years",
+    "num_credit_lines",
+    "num_derogatory_marks",
+    "credit_utilization",
+    "late_payment_severity_score",
+    "home_ownership",
+    "purpose_encoded",
+    "num_late_payments",
+    "savings_balance",
+    "monthly_expenses"
+  ],
+  "last_updated": "2026-08-24T14:35:19.483011"
+}

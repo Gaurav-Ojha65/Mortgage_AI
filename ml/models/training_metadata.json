@@ -1,0 +1,121 @@
+{
+  "model_name": "LightGBM",
+  "model_version": "v3.1",
+  "calibration_version": "oof-iso-v3.1",
+  "policy_version": "v3.1-policy-v1",
+  "methodology": "5-Fold Stratified OOF Isotonic Calibration on Real Training Split (HPO-tuned via Optuna Trial 47)",
+  "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+  "environment": {
+    "python_version": "3.14.3",
+    "os": "Windows-11-10.0.26200-SP0",
+    "lightgbm_version": "4.6.0",
+    "scikit_learn_version": "1.8.0",
+    "joblib_version": "1.5.3"
+  },
+  "dataset_provenance": {
+    "real_train_csv_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+    "train_csv_sha256": "abedb28b06123b71cf5c46cfc0d1f858d081940d24b3e44d359f35dc86c3b704",
+    "val_csv_sha256": "1b7137872db2c40423a48adc28bcbc652e5edbe29756ec401782f27c73c78dd3",
+    "test_csv_sha256": "0cd564fa1cd31262daf8478a82b81cf3a5c3637d3eece8a32421bc356443778e",
+    "feature_schema_sha256": "1e4fb88a829079dd1d44eb13e439d2ded7c2981d9ea712dc55dffa9dbe810f32",
+    "real_train_samples": 99856,
+    "smote_train_samples": 139659,
+    "val_samples": 21398,
+    "test_samples": 21398,
+    "natural_default_prevalence": 0.0676
+  },
+  "hpo_configuration": {
+    "optuna_trial_number": 47,
+    "random_seed": 42,
+    "hyperparameters": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "depth_leaf_constraint": "num_leaves <= 2^(max_depth) enforced (20 <= 1024)",
+    "feature_names": [
+      "credit_score",
+      "annual_income",
+      "loan_amount",
+      "loan_term",
+      "dti_ratio",
+      "employment_years",
+      "num_credit_lines",
+      "num_derogatory_marks",
+      "credit_utilization",
+      "late_payment_severity_score",
+      "home_ownership",
+      "purpose_encoded",
+      "num_late_payments",
+      "savings_balance",
+      "monthly_expenses"
+    ]
+  },
+  "measured_test_metrics": {
+    "roc_auc": 0.8615,
+    "pr_auc": 0.3995,
+    "brier_score": 0.0492,
+    "weighted_ece": 0.0012,
+    "macro_ece": 0.0129
+  },
+  "frozen_policy": {
+    "policy_name": "optimized_3tier_economic_policy",
+    "approve_threshold": 0.045,
+    "reject_threshold": 0.335,
+    "approval_pct": 0.7105,
+    "review_pct": 0.2409,
+    "rejection_pct": 0.0486,
+    "approved_defaults": 277,
+    "rejected_non_defaults": 519,
+    "rejected_defaults": 522,
+    "fn_cost": 2770000.0,
+    "fp_cost": 519000.0,
+    "review_cost": 773100.0,
+    "total_expected_cost": 4062100.0,
+    "cost_per_applicant": 189.84,
+    "precision": 0.1887,
+    "recall": 0.8084,
+    "specificity": 0.7481,
+    "f1": 0.306,
+    "fpr": 0.2519,
+    "fnr": 0.1916
+  },
+  "statistical_uncertainty_vs_v3_baseline": {
+    "bootstrap_samples": 1000,
+    "roc_auc_delta_95_ci": [
+      0.0002,
+      0.0032
+    ],
+    "roc_auc_statistically_distinguishable": true,
+    "brier_delta_95_ci": [
+      -0.0005,
+      -0.0001
+    ],
+    "brier_statistically_distinguishable": true,
+    "pr_auc_delta_95_ci": [
+      -0.0011,
+      0.0104
+    ],
+    "pr_auc_statistically_distinguishable": false,
+    "total_cost_delta_95_ci": [
+      -153881.0,
+      109024.0
+    ],
+    "total_cost_statistically_distinguishable": false,
+    "note": "Cost improvement observed on single test split is NOT statistically distinguishable under paired bootstrap resampling."
+  },
+  "saved_artifacts": {
+    "raw_base_model": "ml/models/lightgbm.joblib",
+    "oof_calibrator_isotonic": "ml/models/lightgbm_oof_calibrator_isotonic.joblib",
+    "oof_calibrator_sigmoid": "ml/models/lightgbm_oof_calibrator_sigmoid.joblib",
+    "calibrated_pipeline": "ml/models/lightgbm_calibrated_pipeline.joblib",
+    "frozen_policy_config": "ml/models/frozen_policy_config.json"
+  },
+  "created_at": "2026-08-24T23:26:39.185110"
+}

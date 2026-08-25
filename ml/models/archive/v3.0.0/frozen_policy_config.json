@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "source": "validation_split_optimization",
+    "val_sample_size": 21398,
+    "val_default_prevalence": 0.0676,
+    "calibrated_pipeline_version": "v3.0-oof-calibrated",
+    "optimized_at": "2026-08-24T16:08:28.450391"
+  },
+  "cost_model": {
+    "cost_fn": 10000.0,
+    "cost_fp": 1000.0,
+    "cost_manual_review": 150.0,
+    "is_demonstration": true
+  },
+  "frozen_thresholds": {
+    "f1_optimal": {
+      "threshold": 0.22,
+      "val_f1": 0.4449
+    },
+    "balanced_accuracy": {
+      "threshold": 0.075,
+      "val_balanced_acc": 0.783
+    },
+    "cost_sensitive_10_1": {
+      "threshold": 0.085,
+      "cost_ratio": "10:1"
+    },
+    "cost_sensitive_5_1": {
+      "threshold": 0.185,
+      "cost_ratio": "5:1"
+    },
+    "three_tier_economic": {
+      "approve_threshold": 0.055,
+      "reject_threshold": 0.405,
+      "val_expected_cost": 3975900.0,
+      "max_review_rate_constraint": 0.25
+    }
+  }
+}

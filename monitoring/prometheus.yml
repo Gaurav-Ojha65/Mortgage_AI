@@ -16,15 +16,8 @@ scrape_configs:
     metrics_path: /metrics
     scrape_interval: 5s
 
-  - job_name: 'redis'
-    static_configs:
-      - targets: ['redis:6379']
-
-  - job_name: 'postgres'
-    static_configs:
-      - targets: ['db:5432']
-
 alerting:
   alertmanagers:
     - static_configs:
         - targets: []
+

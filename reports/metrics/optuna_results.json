@@ -1,0 +1,312 @@
+{
+  "metadata": {
+    "study_name": "lightgbm_hpo_v3_study",
+    "study_database": "C:\\Users\\gaura\\OneDrive\\Desktop\\Gravity_Change\\reports\\optuna_study.db",
+    "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+    "environment": {
+      "python_version": "3.14.3",
+      "os": "Windows-11-10.0.26200-SP0",
+      "optuna_version": "4.9.0",
+      "lightgbm_version": "4.6.0",
+      "joblib_version": "1.5.3"
+    },
+    "data_provenance": {
+      "real_train_csv_sha256": "99260fdca6c6702d2d1d7272278c87729ec52ce57cc227654e64d439e4cac1c4",
+      "feature_schema_sha256": "1e4fb88a829079dd1d44eb13e439d2ded7c2981d9ea712dc55dffa9dbe810f32",
+      "sample_size": 99856,
+      "positive_prevalence": 0.0676
+    },
+    "hpo_configuration": {
+      "n_trials_requested": 75,
+      "n_trials_total": 75,
+      "random_seed": 42,
+      "sampler": "TPESampler(multivariate=True)",
+      "pruner": "MedianPruner(n_startup_trials=10, n_warmup_steps=3, interval_steps=1)",
+      "pruning_rule": "Prune trial if cumulative mean ROC-AUC after fold 3, 4 is below median of completed trials at same step.",
+      "search_space_definition": {
+        "n_estimators": "[300, 800] integer",
+        "learning_rate": "[0.005, 0.1] log-uniform",
+        "max_depth": "[4, 10] integer",
+        "num_leaves": "[15, min(63, 2^max_depth - 1)] integer",
+        "min_child_samples": "[10, 80] integer",
+        "subsample": "[0.6, 1.0] uniform (subsample_freq=1 when < 1.0)",
+        "colsample_bytree": "[0.5, 1.0] uniform",
+        "reg_alpha": "[1e-5, 2.0] log-uniform",
+        "reg_lambda": "[1e-5, 5.0] log-uniform"
+      }
+    },
+    "created_at": "2026-08-24T20:35:05.061219"
+  },
+  "study_summary": {
+    "total_trials": 75,
+    "completed_trials_count": 71,
+    "pruned_trials_count": 4,
+    "failed_trials_count": 0,
+    "total_runtime_seconds": 1845.0,
+    "trajectory_note": "Recent trials found near-optimal or optimal solutions; search converged smoothly."
+  },
+  "baseline_trial_0": {
+    "trial_number": 0,
+    "params": {
+      "n_estimators": 500,
+      "learning_rate": 0.03,
+      "max_depth": 6,
+      "num_leaves": 31,
+      "min_child_samples": 25,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_alpha": 0.2,
+      "reg_lambda": 2.0
+    },
+    "mean_roc_auc": 0.85576,
+    "std_roc_auc": 0.00359,
+    "pr_auc": 0.3903,
+    "brier_score": 0.05015,
+    "weighted_ece": 0.0054,
+    "rank_in_study": 51
+  },
+  "best_trial": {
+    "trial_number": 47,
+    "mean_roc_auc": 0.85749,
+    "std_roc_auc": 0.00347,
+    "pr_auc": 0.39519,
+    "brier_score": 0.04992,
+    "weighted_ece": 0.0064,
+    "macro_ece": 0.0267,
+    "training_time_s": 9.57,
+    "params": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "roc_auc_delta_vs_baseline": 0.00173
+  },
+  "top_10_trials": [
+    {
+      "rank": 1,
+      "trial_number": 47,
+      "mean_roc_auc": 0.85749,
+      "std_roc_auc": 0.00347,
+      "pr_auc": 0.39519,
+      "brier_score": 0.04992,
+      "weighted_ece": 0.0064,
+      "macro_ece": 0.0267,
+      "training_time_s": 9.57,
+      "params": {
+        "n_estimators": 651,
+        "learning_rate": 0.02197044655806209,
+        "max_depth": 10,
+        "num_leaves": 20,
+        "min_child_samples": 23,
+        "subsample": 0.6806192813049439,
+        "colsample_bytree": 0.5162494742147368,
+        "reg_alpha": 0.45639816275813977,
+        "reg_lambda": 1.4932419910894181e-05
+      }
+    },
+    {
+      "rank": 2,
+      "trial_number": 68,
+      "mean_roc_auc": 0.85745,
+      "std_roc_auc": 0.00356,
+      "pr_auc": 0.39521,
+      "brier_score": 0.04995,
+      "weighted_ece": 0.0067,
+      "macro_ece": 0.0267,
+      "training_time_s": 9.11,
+      "params": {
+        "n_estimators": 598,
+        "learning_rate": 0.02648507840191499,
+        "max_depth": 9,
+        "num_leaves": 15,
+        "min_child_samples": 26,
+        "subsample": 0.763301070031431,
+        "colsample_bytree": 0.6768594589570162,
+        "reg_alpha": 0.4022084427940774,
+        "reg_lambda": 3.206242514565765e-05
+      }
+    },
+    {
+      "rank": 3,
+      "trial_number": 59,
+      "mean_roc_auc": 0.85731,
+      "std_roc_auc": 0.00333,
+      "pr_auc": 0.39383,
+      "brier_score": 0.05,
+      "weighted_ece": 0.0073,
+      "macro_ece": 0.0296,
+      "training_time_s": 6.33,
+      "params": {
+        "n_estimators": 455,
+        "learning_rate": 0.03269772345600284,
+        "max_depth": 9,
+        "num_leaves": 15,
+        "min_child_samples": 23,
+        "subsample": 0.6943121951445403,
+        "colsample_bytree": 0.7585474264369982,
+        "reg_alpha": 0.11560594991584931,
+        "reg_lambda": 9.887999019514933e-05
+      }
+    },
+    {
+      "rank": 4,
+      "trial_number": 50,
+      "mean_roc_auc": 0.85729,
+      "std_roc_auc": 0.00321,
+      "pr_auc": 0.39523,
+      "brier_score": 0.04994,
+      "weighted_ece": 0.0073,
+      "macro_ece": 0.0296,
+      "training_time_s": 9.12,
+      "params": {
+        "n_estimators": 593,
+        "learning_rate": 0.020153720733914658,
+        "max_depth": 10,
+        "num_leaves": 21,
+        "min_child_samples": 25,
+        "subsample": 0.6585143478505074,
+        "colsample_bytree": 0.6133115130769938,
+        "reg_alpha": 0.18458909175847257,
+        "reg_lambda": 1.2650519863815162e-05
+      }
+    },
+    {
+      "rank": 5,
+      "trial_number": 25,
+      "mean_roc_auc": 0.85727,
+      "std_roc_auc": 0.00348,
+      "pr_auc": 0.39448,
+      "brier_score": 0.04997,
+      "weighted_ece": 0.0066,
+      "macro_ece": 0.0281,
+      "training_time_s": 26.78,
+      "params": {
+        "n_estimators": 707,
+        "learning_rate": 0.01704298678451778,
+        "max_depth": 8,
+        "num_leaves": 25,
+        "min_child_samples": 39,
+        "subsample": 0.7068530571867697,
+        "colsample_bytree": 0.5141177848538413,
+        "reg_alpha": 0.9162811247287544,
+        "reg_lambda": 1.7684853948927547e-05
+      }
+    },
+    {
+      "rank": 6,
+      "trial_number": 53,
+      "mean_roc_auc": 0.85727,
+      "std_roc_auc": 0.00328,
+      "pr_auc": 0.39474,
+      "brier_score": 0.04999,
+      "weighted_ece": 0.0087,
+      "macro_ece": 0.0277,
+      "training_time_s": 10.46,
+      "params": {
+        "n_estimators": 646,
+        "learning_rate": 0.015392435942380439,
+        "max_depth": 10,
+        "num_leaves": 21,
+        "min_child_samples": 13,
+        "subsample": 0.6666165767959831,
+        "colsample_bytree": 0.5504322759829575,
+        "reg_alpha": 0.0668059531554487,
+        "reg_lambda": 1.7111601675006786e-05
+      }
+    },
+    {
+      "rank": 7,
+      "trial_number": 34,
+      "mean_roc_auc": 0.85726,
+      "std_roc_auc": 0.00339,
+      "pr_auc": 0.39417,
+      "brier_score": 0.04999,
+      "weighted_ece": 0.0072,
+      "macro_ece": 0.0312,
+      "training_time_s": 9.62,
+      "params": {
+        "n_estimators": 641,
+        "learning_rate": 0.01810946385079303,
+        "max_depth": 8,
+        "num_leaves": 25,
+        "min_child_samples": 20,
+        "subsample": 0.6598116541170372,
+        "colsample_bytree": 0.5714245109574438,
+        "reg_alpha": 0.2505039637926817,
+        "reg_lambda": 6.540918621990958e-05
+      }
+    },
+    {
+      "rank": 8,
+      "trial_number": 57,
+      "mean_roc_auc": 0.85723,
+      "std_roc_auc": 0.00331,
+      "pr_auc": 0.39435,
+      "brier_score": 0.04995,
+      "weighted_ece": 0.0068,
+      "macro_ece": 0.0312,
+      "training_time_s": 8.65,
+      "params": {
+        "n_estimators": 526,
+        "learning_rate": 0.024776819304041534,
+        "max_depth": 9,
+        "num_leaves": 21,
+        "min_child_samples": 25,
+        "subsample": 0.6926173895413099,
+        "colsample_bytree": 0.6794454445739563,
+        "reg_alpha": 0.2819981354538989,
+        "reg_lambda": 1.8049733521210883e-05
+      }
+    },
+    {
+      "rank": 9,
+      "trial_number": 42,
+      "mean_roc_auc": 0.85721,
+      "std_roc_auc": 0.00343,
+      "pr_auc": 0.39418,
+      "brier_score": 0.04997,
+      "weighted_ece": 0.0073,
+      "macro_ece": 0.0273,
+      "training_time_s": 8.46,
+      "params": {
+        "n_estimators": 509,
+        "learning_rate": 0.021306425450789077,
+        "max_depth": 10,
+        "num_leaves": 26,
+        "min_child_samples": 28,
+        "subsample": 0.667380736193314,
+        "colsample_bytree": 0.5197764665679003,
+        "reg_alpha": 0.04879836064877095,
+        "reg_lambda": 2.8415023535370035e-05
+      }
+    },
+    {
+      "rank": 10,
+      "trial_number": 58,
+      "mean_roc_auc": 0.85718,
+      "std_roc_auc": 0.00333,
+      "pr_auc": 0.39444,
+      "brier_score": 0.04999,
+      "weighted_ece": 0.0072,
+      "macro_ece": 0.0303,
+      "training_time_s": 7.24,
+      "params": {
+        "n_estimators": 509,
+        "learning_rate": 0.027859991212890862,
+        "max_depth": 8,
+        "num_leaves": 16,
+        "min_child_samples": 43,
+        "subsample": 0.6684977735238112,
+        "colsample_bytree": 0.7647074654159152,
+        "reg_alpha": 0.005385527867832258,
+        "reg_lambda": 2.692859252329502e-05
+      }
+    }
+  ]
+}

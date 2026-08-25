@@ -1,0 +1,65 @@
+.ui-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+}
+
+.ui-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+}
+
+.ui-input {
+  background-color: rgba(15, 22, 34, 0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.ui-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(232, 160, 32, 0.1);
+}
+
+.ui-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ui-input.error {
+  border-color: var(--danger);
+}
+
+.ui-input.error:focus {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+.ui-error-text {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.ui-helper-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Hide native number spinners */
+.ui-input[type="number"]::-webkit-outer-spin-button,
+.ui-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ui-input[type="number"] {
+  -moz-appearance: textfield;
+}

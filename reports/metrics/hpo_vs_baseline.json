@@ -1,0 +1,157 @@
+{
+  "metadata": {
+    "eval_dataset": "data/test.csv (N=21,398 untouched)",
+    "git_commit_sha": "f9f2b566b1a51c03f45d9f907bcb89e14bc90bd3",
+    "timestamp": "2026-08-24T21:47:55.740800"
+  },
+  "baseline_v3": {
+    "version": "v3.0.0-oof-baseline",
+    "model_name": "LightGBM (Baseline)",
+    "hyperparameters": {
+      "n_estimators": 500,
+      "learning_rate": 0.03,
+      "max_depth": 6,
+      "num_leaves": 31,
+      "min_child_samples": 25,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "reg_alpha": 0.2,
+      "reg_lambda": 2.0
+    },
+    "test_metrics": {
+      "roc_auc": 0.8599,
+      "pr_auc": 0.3947,
+      "brier_score": 0.0494,
+      "weighted_ece": 0.0018,
+      "macro_ece": 0.0353
+    },
+    "frozen_policy": {
+      "policy_name": "frozen_oof_3tier_policy",
+      "approve_threshold": 0.055,
+      "reject_threshold": 0.405,
+      "approval_pct": 0.724,
+      "review_pct": 0.2461,
+      "rejection_pct": 0.0299,
+      "approved_defaults": 302,
+      "rejected_non_defaults": 273,
+      "rejected_defaults": 366,
+      "fn_cost": 3020000.0,
+      "fp_cost": 273000.0,
+      "review_cost": 789900.0,
+      "total_expected_cost": 4082900.0,
+      "cost_per_applicant": 190.81,
+      "precision": 0.1937,
+      "recall": 0.7911,
+      "specificity": 0.7614,
+      "f1": 0.3113,
+      "fpr": 0.2386,
+      "fnr": 0.2089
+    }
+  },
+  "candidate_hpo": {
+    "version": "v3.1-hpo-candidate",
+    "model_name": "LightGBM (HPO Best Candidate)",
+    "hyperparameters": {
+      "n_estimators": 651,
+      "learning_rate": 0.02197044655806209,
+      "max_depth": 10,
+      "num_leaves": 20,
+      "min_child_samples": 23,
+      "subsample": 0.6806192813049439,
+      "colsample_bytree": 0.5162494742147368,
+      "reg_alpha": 0.45639816275813977,
+      "reg_lambda": 1.4932419910894181e-05
+    },
+    "test_metrics": {
+      "roc_auc": 0.8615,
+      "pr_auc": 0.3995,
+      "brier_score": 0.0492,
+      "weighted_ece": 0.0012,
+      "macro_ece": 0.0129
+    },
+    "frozen_policy": {
+      "policy_name": "optimized_3tier_economic_policy",
+      "approve_threshold": 0.045,
+      "reject_threshold": 0.335,
+      "approval_pct": 0.7105,
+      "review_pct": 0.2409,
+      "rejection_pct": 0.0486,
+      "approved_defaults": 277,
+      "rejected_non_defaults": 519,
+      "rejected_defaults": 522,
+      "fn_cost": 2770000.0,
+      "fp_cost": 519000.0,
+      "review_cost": 773100.0,
+      "total_expected_cost": 4062100.0,
+      "cost_per_applicant": 189.84,
+      "precision": 0.1887,
+      "recall": 0.8084,
+      "specificity": 0.7481,
+      "f1": 0.306,
+      "fpr": 0.2519,
+      "fnr": 0.1916
+    },
+    "engineering_metrics": {
+      "training_time_seconds": 6.09,
+      "oof_cv_runtime_seconds": 3569.69,
+      "inference_latency_ms_per_app": 2.643,
+      "model_artifact_size_kb": 1472.1
+    }
+  },
+  "deltas": {
+    "roc_auc_delta": 0.0016,
+    "pr_auc_delta": 0.0048,
+    "brier_score_delta": -0.0002,
+    "weighted_ece_delta": -0.0006,
+    "total_cost_delta": -20800.0,
+    "cost_delta_pct": -0.51,
+    "cost_per_app_delta": -0.97,
+    "review_rate_delta": -0.0052
+  },
+  "acceptance_evaluation": {
+    "c1_roc_auc_preserved_or_improved": {
+      "passed": true,
+      "baseline": 0.8599,
+      "candidate": 0.8615,
+      "delta": 0.0016,
+      "rule": "delta >= -0.0020"
+    },
+    "c2_pr_auc_preserved": {
+      "passed": true,
+      "baseline": 0.3947,
+      "candidate": 0.3995,
+      "delta": 0.0048,
+      "rule": "delta >= -0.0050"
+    },
+    "c3_brier_preserved": {
+      "passed": true,
+      "baseline": 0.0494,
+      "candidate": 0.0492,
+      "delta": -0.0002,
+      "rule": "delta <= 0.0010"
+    },
+    "c4_wece_preserved": {
+      "passed": true,
+      "baseline": 0.0018,
+      "candidate": 0.0012,
+      "delta": -0.0006,
+      "rule": "delta <= 0.0015"
+    },
+    "c5_economic_cost_improved": {
+      "passed": true,
+      "baseline_cost": 4082900.0,
+      "candidate_cost": 4062100.0,
+      "cost_delta": -20800.0,
+      "cost_delta_pct": -0.51,
+      "rule": "candidate_cost <= baseline_cost"
+    },
+    "c6_review_capacity_respected": {
+      "passed": true,
+      "baseline_review_pct": 0.2461,
+      "candidate_review_pct": 0.2409,
+      "rule": "candidate_review_pct <= 0.25"
+    },
+    "all_criteria_met": true,
+    "final_recommendation": "ADOPT_HPO_CANDIDATE"
+  }
+}

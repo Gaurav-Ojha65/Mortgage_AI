@@ -1,0 +1,23 @@
+.ui-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.ui-card.elevated {
+  box-shadow: var(--shadow-sm);
+  background: linear-gradient(145deg, var(--surface) 0%, rgba(15, 22, 34, 0.8) 100%);
+}
+
+.ui-card.interactive {
+  cursor: pointer;
+}
+
+.ui-card.interactive:hover {
+  border-color: rgba(232, 160, 32, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
