@@ -1,12 +1,12 @@
-# Mortgage AI v3.1 — Production Credit Risk & Underwriting Decision Platform
+# Mortgage AI v3.1 — AI-Powered Mortgage Risk Analytics
 
-> **Enterprise-grade mortgage credit risk analytics, probability calibration, and underwriting decision-support platform powered by out-of-fold calibrated LightGBM, TreeSHAP explainability, and cost-sensitive economic routing.**
+> **AI-powered mortgage default-risk analytics and underwriting decision support using OOF-calibrated LightGBM, TreeSHAP, and cost-sensitive policy routing.**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
 [![React 18](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev)
-[![Tests Passing](https://img.shields.io/badge/pytest-89%20passed%20(100%25)-success.svg)](file:///tests)
-[![Model Status](https://img.shields.io/badge/ML%20Core-Frozen%20v3.1-orange.svg)](file:///ml/models)
+[![Tests Passing](https://img.shields.io/badge/pytest-89%20passed%20(100%25)-success.svg)](tests/)
+[![Model Status](https://img.shields.io/badge/ML%20Core-Frozen%20v3.1-orange.svg)](ml/models/)
 
 ---
 
@@ -23,6 +23,9 @@ Mortgage AI v3.1 resolves the two fundamental weaknesses of traditional loan ris
 └──────────────────┴─────────────────┴─────────────────┴────────────────┴────────────────┘
 ```
 
+![Reliability Diagram & Calibration](docs/images/dashboard.png)
+*Figure 1: Empirical Reliability Diagram demonstrating 5-fold out-of-fold monotonic isotonic calibration (Weighted ECE: 0.0012, Brier Score: 0.0492) evaluated across N=21,398 holdout test applicants.*
+
 ```mermaid
 flowchart LR
     Applicant["Applicant Data<br/>(15 Canonical Features)"]
@@ -33,7 +36,7 @@ flowchart LR
     Approve["✓ AUTO-APPROVE<br/>p <= 0.045 (71.05% vol)"]
     Review["~ MANUAL REVIEW<br/>0.045 < p < 0.335 (24.09% vol)"]
     Reject["✗ AUTO-REJECT<br/>p >= 0.335 (4.86% vol)"]
-    Audit[("SQLite Audit Trail<br/>mortgage.db")]
+    Audit[("Append-Only Audit Log<br/>mortgage.db")]
 
     Applicant --> LGBM --> Calib --> Policy
     LGBM --> SHAP
@@ -73,7 +76,41 @@ flowchart LR
 
 ---
 
-## 2. Machine Learning Pipeline & HPO
+## 2. Visual Interface & Analytical Workflows
+
+### A. Applicant Risk Decision & 3-Tier Policy Routing
+Applications are evaluated through a cost-sensitive 3-tier economic policy that minimizes asymmetric portfolio loss while keeping human underwriter review queues within a strict $\le 25\%$ operational capacity constraint.
+
+![3-Tier Policy Routing](docs/images/predict-risk.png)
+*Figure 2: 3-Tier policy routing spectrum partitioning risk into Auto-Approve (p <= 0.045, 71.05% volume), Manual Review (0.045 < p < 0.335, 24.09% volume), and Auto-Reject (p >= 0.335, 4.86% volume).*
+
+### B. SHAP Feature Attribution & Waterfall Explainability
+Every inference request generates exact TreeSHAP attributions with machine-precision additivity ($1.24 \times 10^{-14}$ error), breaking down individual risk factors from the empirical base rate.
+
+![TreeSHAP Local Explanation](docs/images/shap-explanation.png)
+*Figure 3: Local applicant TreeSHAP attribution waterfall quantifying directional log-odds contributions for individual borrower risk factors.*
+
+### C. Global Model Analytics & Feature Hierarchy
+Global feature importance is evaluated across the holdout validation split, identifying delinquency severity, revolving utilization, and debt-to-income as primary empirical default drivers.
+
+![Global Feature Importance](docs/images/analytics.png)
+*Figure 4: Global Mean Absolute SHAP feature importance for LightGBM v3.1 (Optuna Trial #47).*
+
+### D. What-If Scenario Simulation & Sensitivity Surface
+Borrowers and underwriters can perform interactive counterfactual simulations to evaluate how financial adjustments impact calibrated default probabilities and decision thresholds.
+
+![Policy Sensitivity Heatmap](docs/images/what-if.png)
+*Figure 5: 2D Policy Sensitivity Cost Heatmap demonstrating total portfolio cost optimization around the canonical operating point ($0.045 / 0.335$).*
+
+### E. Audit Trail & Fair Lending Parity
+Every prediction, probability vector, and policy decision is recorded to an append-only audit trail with demographic metadata to support ongoing fair lending audits under the Four-Fifths rule.
+
+![Fairness Audit Comparison](docs/images/audit-history.png)
+*Figure 6: Demographic subgroup disparity comparison evaluating approval rate parity against observed default rates.*
+
+---
+
+## 3. Machine Learning Pipeline & HPO
 
 ### A. 15 Canonical Input Features
 1. `credit_score` [300–850]
@@ -102,7 +139,7 @@ Optimized strictly via 5-Fold Stratified Cross-Validation on `data/real_train.cs
 
 ---
 
-## 3. Out-of-Fold (OOF) Probability Calibration
+## 4. Out-of-Fold (OOF) Probability Calibration
 
 To eliminate calibration data leakage and prevent optimistic probability distortion, an Isotonic Calibrator is fitted strictly on 5-fold out-of-fold validation predictions.
 
@@ -115,7 +152,7 @@ To eliminate calibration data leakage and prevent optimistic probability distort
 
 ---
 
-## 4. Multi-Model Benchmark Comparison Table
+## 5. Multi-Model Benchmark Comparison Table
 
 Evaluated on the untouched holdout test split ($N = 21,398$):
 
@@ -129,7 +166,7 @@ Evaluated on the untouched holdout test split ($N = 21,398$):
 
 ---
 
-## 5. 3-Tier Cost-Sensitive Decision Policy (`v3.1-policy-v1`)
+## 6. 3-Tier Cost-Sensitive Decision Policy (`v3.1-policy-v1`)
 
 Decision thresholds are optimized on validation data to minimize asymmetric portfolio loss:
 - **Cost Model (Demonstration Parameters):**
@@ -148,19 +185,19 @@ Calibrated Default Probability (p_cal)
 
 ---
 
-## 6. Live 2-Minute Demo Walkthrough
+## 7. Live 2-Minute Demo Walkthrough
 
-A complete scripted 2-minute walkthrough guide is available in [`docs/demo.md`](file:///docs/demo.md):
+A complete scripted 2-minute walkthrough guide is available in [`docs/demo.md`](docs/demo.md):
 
 1. **Dashboard & Health Provenance (0:00–0:25)**: Verify active `v3.1`, `oof-iso-v3.1`, and database connectivity.
 2. **Applicant Inference & 3-Tier Routing (0:25–0:50)**: Input applicant data, calibrate probability, trigger review triage.
 3. **TreeSHAP Waterfall (0:50–1:15)**: Review additive local feature attributions from the base rate ($14.9\%$).
 4. **What-If Scenario Simulator (1:15–1:40)**: Adjust credit score & utilization in real time to transition from Review $\to$ Approve.
-5. **Audit Trail & CSV Export (1:40–2:00)**: Inspect immutable SQLite logs and download compliance audit records.
+5. **Audit Trail & CSV Export (1:40–2:00)**: Inspect append-only audit logs and download audit records.
 
 ---
 
-## 7. Quick Start & Verification
+## 8. Quick Start & Verification
 
 ### Local Development Setup
 
@@ -187,13 +224,13 @@ npm run preview
 ### Docker Deployment
 
 ```bash
-# Launch entire stack (backend, frontend, prometheus)
+# Launch core stack (backend, frontend, prometheus)
 docker compose up --build
 ```
 
 ---
 
-## 8. Artifact Provenance & Reproducibility
+## 9. Artifact Provenance & Reproducibility
 
 | Artifact | Path | Description |
 |---|---|---|
@@ -205,7 +242,7 @@ docker compose up --build
 
 ---
 
-## 9. Limitations & Disclaimers
+## 10. Limitations & Disclaimers
 
 1. **Demonstration Cost Parameters:** Economic loss calculations and threshold values are optimized for illustrative cost matrices ($C_{\text{FN}}=\$10,000, C_{\text{FP}}=\$1,000, C_{\text{REV}}=\$150$). Real-world deployment requires enterprise portfolio calibration.
 2. **Macroeconomic Sensitivity:** Probability calibrators are fitted under baseline macroeconomic conditions. Severe macroeconomic regime shifts require periodic out-of-fold recalibration.
