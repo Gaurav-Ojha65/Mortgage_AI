@@ -23,7 +23,15 @@ from pydantic import BaseModel, Field
 import json
 
 # ─── Config ───────────────────────────────────────────────────────────────────
-SECRET_KEY = os.environ.get("JWT_SECRET", "mortgage-ai-secret-key-change-in-production")
+# Opaque server-side token system secret (not a true JWT in this implementation)
+# Required in production mode.
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY and os.environ.get("ENV") == "production":
+    raise ValueError("SECRET_KEY environment variable is required in production mode.")
+# Fallback for local development only if not strictly enforced
+if not SECRET_KEY:
+    SECRET_KEY = "development-secret-key-do-not-use-in-prod"
+
 TOKEN_EXPIRE_HOURS = 24
 from database import DATABASE_PATH
 
@@ -68,8 +76,10 @@ def verify_password(password: str, hashed: str, salt: str) -> bool:
     return secrets.compare_digest(check_hash, hashed)
 
 
-# ─── Simple Token System (no external JWT dependency) ────────────────────────
-# Using a server-side token store for simplicity and security
+# ─── Simple Token System (Opaque Server-Side Tokens) ─────────────────────────
+# Note: Using an in-memory server-side token store for simplicity.
+# This acts as a development/demo session store. Tokens are NOT preserved across 
+# backend restarts. For enterprise persistence, replace with Redis or DB table.
 _token_store = {}  # token -> {user_id, username, role, expires}
 
 
@@ -199,21 +209,22 @@ def authenticate_user(username: str, password: str) -> dict:
     user = cursor.fetchone()
     conn.close()
 
-    # DEMO MODE: Bypass password verification
-    # Return existing user if found, otherwise return a mock user
+    if not user:
+        record_failed_attempt(username)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+        )
+
+    if not verify_password(password, user["password_hash"], user["password_salt"]):
+        record_failed_attempt(username)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+        )
+
     clear_attempts(username)
-    if user:
-        return dict(user)
-    else:
-        return {
-            "id": 9999,
-            "username": username,
-            "role": "admin",
-            "full_name": f"Demo User ({username})",
-            "is_active": 1,
-            "created_at": datetime.now().isoformat(),
-            "last_login": datetime.now().isoformat()
-        }
+    return dict(user)
 
 
 

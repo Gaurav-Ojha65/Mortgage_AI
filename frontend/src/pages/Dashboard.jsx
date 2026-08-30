@@ -198,13 +198,13 @@ export default function Dashboard() {
     }
 
     // 2. High-risk clustering
-    const highRisk = hist.filter(h => (h.default_probability || 0) > 0.5);
+    const highRisk = hist.filter(h => (h.default_probability || 0) > 0.335);
     const highRiskPct = (highRisk.length / total) * 100;
     if (highRiskPct > 40) {
       anomalies.push({
         severity: highRiskPct > 60 ? 'high' : 'medium',
         title: 'High-Risk Clustering',
-        msg: `${highRiskPct.toFixed(0)}% of applications are in the high-risk band (>50% default probability) — significantly above expected baseline.`
+        msg: `${highRiskPct.toFixed(0)}% of applications are in the high-risk band (>33.5% default probability) — significantly above expected baseline.`
       });
     }
 
@@ -434,8 +434,8 @@ export default function Dashboard() {
           <div className="db-sidebar-card db-quick-stats">
             <h3 className="db-section-title" style={{ marginBottom: '12px' }}>Quick Stats</h3>
             {[
-              { label: 'High Risk',   val: `${stats ? Math.round(history.filter(h => (h.default_probability||0)*100 > 50).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#EF4444' },
-              { label: 'Low Risk',    val: `${stats ? Math.round(history.filter(h => (h.default_probability||0)*100 < 25).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#22C55E' },
+              { label: 'High Risk',   val: `${stats ? Math.round(history.filter(h => (h.default_probability||0) > 0.335).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#EF4444' },
+              { label: 'Low Risk',    val: `${stats ? Math.round(history.filter(h => (h.default_probability||0) <= 0.045).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#22C55E' },
               { label: 'Avg Credit',  val: stats ? Math.round(history.reduce((a,h) => a+(h.credit_score||0), 0)/Math.max(stats.total,1)) : 0, color: '#A78BFA' },
             ].map(({ label, val, color }) => (
               <div key={label} className="qs-row">

@@ -23,7 +23,7 @@ def delete_applicant(applicant_id: int, admin: dict = Depends(require_role("admi
     timestamp = datetime.now().isoformat()
     log_action(
         action="DATA_DELETION", 
-        user_id=admin["id"], 
+        user_id=admin["user_id"], 
         metadata={"applicant_id": applicant_id, "reason": "Admin deleted applicant record"}
     )
     
@@ -69,7 +69,7 @@ def purge_old_records(
 
     log_action(
         action="DATA_PURGE",
-        user_id=admin["id"],
+        user_id=admin["user_id"],
         metadata={
             "older_than_days": older_than_days,
             "cutoff_date": cutoff,

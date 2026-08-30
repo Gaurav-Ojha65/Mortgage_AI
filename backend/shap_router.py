@@ -25,9 +25,9 @@ MODEL_NAMES = ["logisticregression", "xgboost", "lightgbm"]
 
 class ApplicantInput(BaseModel):
     credit_score:          float = Field(..., ge=300,  le=850)
-    annual_income:         float = Field(..., ge=0)
-    loan_amount:           float = Field(..., ge=1000)
-    loan_term:             int   = Field(36,  ge=12,   le=360)
+    annual_income:         float = Field(..., ge=0, le=5000000)
+    loan_amount:           float = Field(..., ge=1000, le=25000000)
+    loan_term:             int   = Field(36,  ge=12,   le=600)
     dti_ratio:             float = Field(..., ge=0,    le=1)
     employment_years:      float = Field(2.0, ge=0)
     num_credit_lines:      int   = Field(3,   ge=0)

@@ -62,8 +62,8 @@ const GaugeChart = ({
   // Calculate color based on value percentage
   const percentage = ((value - min) / (max - min)) * 100;
   const getColor = (pct) => {
-    if (pct <= 33) return '#10B981'; // Green - Low risk
-    if (pct <= 66) return '#F59E0B'; // Amber - Medium risk
+    if (pct <= 4.5) return '#10B981'; // Green - Low risk
+    if (pct <= 33.5) return '#F59E0B'; // Amber - Medium risk
     return '#EF4444'; // Red - High risk
   };
 
