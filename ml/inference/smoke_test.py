@@ -120,41 +120,41 @@ def run_smoke_test():
     
     # 6. FastAPI API Endpoint Integration
     print("\n6. Testing FastAPI /analyze endpoint...")
-    client = TestClient(app)
-    api_payload = {
-        "income": 85000,
-        "loan_amount": 250000,
-        "credit_score": 720,
-        "interest_rate": 6.25,
-        "loan_term": 30,
-        "property_value": 350000,
-        "existing_loans": 0,
-    }
-    resp = client.post("/analyze", json=api_payload)
-    assert resp.status_code == 200, f"API returned status {resp.status_code}: {resp.text}"
-    body = resp.json()
-    assert body["success"] is True
-    print(f"   API Response Status: 200 OK")
-    print(f"   Decision: {body['data']['decision']}")
-    print(f"   Calibrated Prob: {body['data']['calibrated_default_probability']}")
-    print(f"   Expected Cost: ${body['data']['expected_economic_cost']}")
-    
-    # 7. Check Policy Evaluate API Endpoint
-    print("\n7. Testing FastAPI /policy/evaluate endpoint...")
-    eval_payload = {
-        "application": api_payload,
-        "approve_threshold": 0.045,
-        "reject_threshold": 0.335,
-        "cost_fn": 10000.0,
-        "cost_fp": 1000.0,
-        "cost_manual_review": 150.0,
-    }
-    resp_pol = client.post("/policy/evaluate", json=eval_payload)
-    assert resp_pol.status_code == 200
-    body_pol = resp_pol.json()
-    assert body_pol["success"] is True
-    print(f"   Policy Evaluate Status: 200 OK")
-    print(f"   Simulated Decision: {body_pol['data']['decision']}")
+    with TestClient(app) as client:
+        api_payload = {
+            "income": 85000,
+            "loan_amount": 250000,
+            "credit_score": 720,
+            "interest_rate": 6.25,
+            "loan_term": 30,
+            "property_value": 350000,
+            "existing_loans": 0,
+        }
+        resp = client.post("/analyze", json=api_payload)
+        assert resp.status_code == 200, f"API returned status {resp.status_code}: {resp.text}"
+        body = resp.json()
+        assert body["success"] is True
+        print(f"   API Response Status: 200 OK")
+        print(f"   Decision: {body['data']['decision']}")
+        print(f"   Calibrated Prob: {body['data']['calibrated_default_probability']}")
+        print(f"   Expected Cost: ${body['data']['expected_economic_cost']}")
+        
+        # 7. Check Policy Evaluate API Endpoint
+        print("\n7. Testing FastAPI /policy/evaluate endpoint...")
+        eval_payload = {
+            "application": api_payload,
+            "approve_threshold": 0.045,
+            "reject_threshold": 0.335,
+            "cost_fn": 10000.0,
+            "cost_fp": 1000.0,
+            "cost_manual_review": 150.0,
+        }
+        resp_pol = client.post("/policy/evaluate", json=eval_payload)
+        assert resp_pol.status_code == 200
+        body_pol = resp_pol.json()
+        assert body_pol["success"] is True
+        print(f"   Policy Evaluate Status: 200 OK")
+        print(f"   Simulated Decision: {body_pol['data']['decision']}")
     
     print("\n" + "=" * 70)
     print("ALL SMOKE TEST CHECKS PASSED PERFECTLY!")

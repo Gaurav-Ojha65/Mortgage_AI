@@ -207,7 +207,10 @@ def init_db():
         ("approval_probability", "REAL"),
         ("age_band", "TEXT"),
         ("region", "TEXT"),
-        ("user_id", "INTEGER")
+        ("user_id", "INTEGER"),
+        ("model_version", "TEXT"),
+        ("calibration_version", "TEXT"),
+        ("policy_version", "TEXT")
     ]
     
     for col_name, col_type in required_columns:
@@ -228,14 +231,16 @@ def save_decision(data: dict):
     cursor.execute("""
         INSERT INTO decisions
         (timestamp, income, loan_amount, credit_score, decision, risk_level,
-         default_probability, approval_probability, emi, model_used, advice, age_band, region, user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         default_probability, approval_probability, emi, model_used, advice, age_band, region, user_id,
+         model_version, calibration_version, policy_version)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data["timestamp"], data["income"], data["loan_amount"],
         data["credit_score"], data["decision"], data["risk_level"],
         data.get("default_probability"), data.get("approval_probability"),
         data["emi"], data.get("model_used"), data.get("advice"),
-        data.get("age_band"), data.get("region"), data.get("user_id")
+        data.get("age_band"), data.get("region"), data.get("user_id"),
+        data.get("model_version"), data.get("calibration_version"), data.get("policy_version")
     ))
 
     conn.commit()
@@ -647,6 +652,9 @@ async def analyze_application(application: LoanApplication, request: Request, us
             "age_band": loan_data.get("age_band"),
             "region": loan_data.get("region"),
             "user_id": user.get("user_id") if user else None,
+            "model_version": response_data["model_version"],
+            "calibration_version": response_data["calibration_version"],
+            "policy_version": response_data["policy_version"],
         })
 
         prediction_count += 1

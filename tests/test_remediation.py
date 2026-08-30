@@ -19,7 +19,11 @@ def test_cors_headers(client):
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
 
 def test_auth_rejection(client):
-    response = client.post("/auth/login", json={"username": "nonexistent", "password": "wrongpassword"})
+    app.state.limiter.reset()
+    response = client.post(
+        "/auth/login", 
+        json={"username": "nonexistent", "password": "wrongpassword"},
+    )
     assert response.status_code == 401
     assert "Invalid username or password" in response.json()["detail"]
 

@@ -73,9 +73,9 @@ function RiskBar({ score }) {
 }
 
 /* ─── KPI Card ───────────────────────────────────────────────────── */
-function KpiCard({ icon, label, value, suffix, decimals = 0, color, sparkData, trend, trendDir, loading }) {
+function KpiCard({ icon, label, value, suffix, decimals = 0, color, sparkData, trend, trendDir, loading, subtitle, tooltip }) {
   return (
-    <div className="kpi-card">
+    <div className="kpi-card" title={tooltip || ''}>
       <div className="kpi-header">
         <div className="kpi-icon" style={{ background: `${color}18`, color }}>
           {icon}
@@ -94,6 +94,7 @@ function KpiCard({ icon, label, value, suffix, decimals = 0, color, sparkData, t
             </div>
         }
         <div className="kpi-label">{label}</div>
+        {subtitle && <div className="kpi-subtitle">{subtitle}</div>}
       </div>
       {sparkData && (
         <div className="kpi-spark">
@@ -151,7 +152,14 @@ export default function Dashboard() {
           const d = (h.decision || '').toLowerCase();
           return d === 'reject' || d === 'rejected';
         }).length;
-        const avgRisk = total > 0 ? (historyList.reduce((a, h) => a + (h.default_probability || 0) * 100, 0) / total) : 0;
+        // Filter to exact canonical v3.1 records
+        const canonicalRecords = historyList.filter(h => 
+          h.model_version === 'v3.1' && 
+          h.calibration_version === 'oof-iso-v3.1' && 
+          h.policy_version === 'v3.1-policy-v1'
+        );
+        const canonicalCount = canonicalRecords.length;
+        const avgRisk = canonicalCount > 0 ? (canonicalRecords.reduce((a, h) => a + (h.default_probability || 0) * 100, 0) / canonicalCount) : 0;
         const approvalRate = total > 0 ? (approved / total) * 100 : 0;
         // Sparkline: approval per last N apps (chunked into 8 points)
         const chunk = Math.max(1, Math.floor(total / 8));
@@ -162,7 +170,7 @@ export default function Dashboard() {
         });
         const avgLoan = total > 0 ? historyList.reduce((a, h) => a + (h.loan_amount || 0), 0) / total : 0;
         setData({ 
-          stats: { total, approved, rejected, avgRisk, approvalRate, avgLoan }, 
+          stats: { total, approved, rejected, avgRisk, approvalRate, avgLoan, canonicalCount }, 
           history: historyList, 
           sparkApproval,
           health: healthRes 
@@ -317,23 +325,30 @@ export default function Dashboard() {
       <div className="db-kpi-grid">
         <KpiCard
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>}
-          label="Total Applications" value={stats?.total || 0}
+          label="Total Scored Applications" value={stats?.total || 0}
+          subtitle="Latest 20 records"
           color="#A78BFA" sparkData={sparkApproval} trend="Live" trendDir="up" loading={loading}
+          tooltip="Total number of recently scored loan applications."
         />
         <KpiCard
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
-          label="Approval Rate" value={stats?.approvalRate || 0} suffix="%" decimals={1}
+          label="Predicted Approval Rate" value={stats?.approvalRate || 0} suffix="%" decimals={1}
+          subtitle="Based on model decisions"
           color="#22C55E" sparkData={sparkApproval} trend={`${stats?.approved || 0} approved`} trendDir="up" loading={loading}
+          tooltip="Percentage of scored applications receiving an APPROVE decision from the v3.1 model. This is not an observed repayment outcome."
         />
         <KpiCard
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>}
           label="Avg Loan Amount" value={stats?.avgLoan || 0} prefix="$" suffix="" decimals={0}
           color="#E8A020" loading={loading}
+          tooltip="Average requested loan amount across the latest scored applications."
         />
         <KpiCard
           icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>}
-          label="Avg Default Risk" value={stats?.avgRisk || 0} suffix="%" decimals={1}
+          label="Avg Predicted Default Risk" value={stats?.avgRisk || 0} suffix="%" decimals={1}
+          subtitle={`v3.1 records: ${stats?.canonicalCount || 0}`}
           color="#EF4444" loading={loading}
+          tooltip="Average calibrated predicted probability of default across v3.1 canonical scored applications. This is NOT an observed default rate."
         />
       </div>
 
@@ -392,9 +407,9 @@ export default function Dashboard() {
         {/* Sidebar */}
         <div className="db-sidebar">
 
-          {/* Portfolio Donut */}
+          {/* Portfolio Predicted Risk */}
           <div className="db-sidebar-card db-portfolio-card">
-            <h3 className="db-section-title">Portfolio Risk</h3>
+            <h3 className="db-section-title" title="Average predicted default probability from the v3.1 calibrated model. Not an observed default rate.">Predicted Portfolio Risk</h3>
             <div className="db-donut-wrap" style={{ marginTop: '10px' }}>
               {loading ? (
                 <div className="donut-skeleton" />
@@ -402,11 +417,12 @@ export default function Dashboard() {
                 <GaugeChart 
                   value={stats?.avgRisk || 0} 
                   size={200} 
-                  label="Avg Default Risk"
+                  label="Avg Predicted Default Risk"
                   suffix="%"
                 />
               )}
             </div>
+            <p style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', margin: '8px 0 12px', lineHeight: '1.4' }}>Based on latest {stats?.canonicalCount || 0} v3.1 scored applications</p>
             <div className="db-split-stats">
               <div className="db-split-item">
                 <span className="db-split-dot" style={{ background: '#22C55E' }} />
@@ -434,9 +450,9 @@ export default function Dashboard() {
           <div className="db-sidebar-card db-quick-stats">
             <h3 className="db-section-title" style={{ marginBottom: '12px' }}>Quick Stats</h3>
             {[
-              { label: 'High Risk',   val: `${stats ? Math.round(history.filter(h => (h.default_probability||0) > 0.335).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#EF4444' },
-              { label: 'Low Risk',    val: `${stats ? Math.round(history.filter(h => (h.default_probability||0) <= 0.045).length / Math.max(stats.total,1) * 100) : 0}%`, color: '#22C55E' },
-              { label: 'Avg Credit',  val: stats ? Math.round(history.reduce((a,h) => a+(h.credit_score||0), 0)/Math.max(stats.total,1)) : 0, color: '#A78BFA' },
+              { label: 'Predicted High Risk',   val: `${stats ? Math.round(history.filter(h => h.model_used === 'lightgbm' && (h.default_probability||0) > 0.335).length / Math.max(stats.canonicalCount||1,1) * 100) : 0}%`, color: '#EF4444' },
+              { label: 'Predicted Low Risk',    val: `${stats ? Math.round(history.filter(h => h.model_used === 'lightgbm' && (h.default_probability||0) <= 0.045).length / Math.max(stats.canonicalCount||1,1) * 100) : 0}%`, color: '#22C55E' },
+              { label: 'Avg Credit Score',  val: stats ? Math.round(history.reduce((a,h) => a+(h.credit_score||0), 0)/Math.max(stats.total,1)) : 0, color: '#A78BFA' },
             ].map(({ label, val, color }) => (
               <div key={label} className="qs-row">
                 <span className="qs-label">{label}</span>
