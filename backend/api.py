@@ -131,14 +131,14 @@ def sanitize_string(value: str) -> str:
 
 class LoanApplication(BaseModel):
     """Validated loan application input — maps to simple /analyze endpoint."""
-    income: float = Field(..., gt=0, description="Monthly income")
-    loan_amount: float = Field(..., gt=0, description="Loan amount")
+    income: float = Field(..., gt=0, le=5000000, description="Monthly income (max $5M)")
+    loan_amount: float = Field(..., gt=0, le=25000000, description="Loan amount (max $25M)")
     interest_rate: float = Field(..., gt=0, le=50, description="Annual interest rate %")
-    loan_term: int = Field(..., gt=0, le=30, description="Loan term in years")
+    loan_term: int = Field(..., gt=0, le=50, description="Loan term in years")
     credit_score: int = Field(..., ge=300, le=850, description="Credit score 300-850")
-    existing_loans: int = Field(default=0, ge=0, description="Number of existing loans")
+    existing_loans: int = Field(default=0, ge=0, le=50, description="Number of existing loans")
     # Optional extended fields for 15-feature model
-    employment_years: Optional[float] = Field(default=None, ge=0)
+    employment_years: Optional[float] = Field(default=None, ge=0, le=70)
     num_credit_lines: Optional[int] = Field(default=None, ge=0)
     num_derogatory_marks: Optional[int] = Field(default=None, ge=0)
     credit_utilization: Optional[float] = Field(default=None, ge=0, le=1.0)
@@ -206,7 +206,8 @@ def init_db():
         ("model_used", "TEXT"),
         ("approval_probability", "REAL"),
         ("age_band", "TEXT"),
-        ("region", "TEXT")
+        ("region", "TEXT"),
+        ("user_id", "INTEGER")
     ]
     
     for col_name, col_type in required_columns:
@@ -227,25 +228,28 @@ def save_decision(data: dict):
     cursor.execute("""
         INSERT INTO decisions
         (timestamp, income, loan_amount, credit_score, decision, risk_level,
-         default_probability, approval_probability, emi, model_used, advice, age_band, region)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         default_probability, approval_probability, emi, model_used, advice, age_band, region, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data["timestamp"], data["income"], data["loan_amount"],
         data["credit_score"], data["decision"], data["risk_level"],
         data.get("default_probability"), data.get("approval_probability"),
         data["emi"], data.get("model_used"), data.get("advice"),
-        data.get("age_band"), data.get("region"),
+        data.get("age_band"), data.get("region"), data.get("user_id")
     ))
 
     conn.commit()
     conn.close()
 
 
-def get_history(limit: int = 20) -> List[dict]:
+def get_history(limit: int = 20, user_id: Optional[int] = None) -> List[dict]:
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM decisions ORDER BY id DESC LIMIT ?", (limit,))
+    if user_id is not None:
+        cursor.execute("SELECT * FROM decisions WHERE user_id = ? ORDER BY id DESC LIMIT ?", (user_id, limit))
+    else:
+        cursor.execute("SELECT * FROM decisions ORDER BY id DESC LIMIT ?", (limit,))
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
@@ -362,9 +366,12 @@ async def limit_request_size(request: Request, call_next):
 
 
 # CORS
+cors_origins_str = os.environ.get("CORS_ORIGINS", "http://localhost:5173")
+cors_origins = [o.strip() for o in cors_origins_str.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -504,27 +511,31 @@ async def analyze_application(application: LoanApplication, request: Request, us
         # Step 2: Map to 15-feature schema for ML model
         features_15 = applicant_to_15_features(loan_data)
 
-        # Step 3: ML prediction (with graceful fallback)
-        ml_result = None
-        model_used = "none"
+        # Step 3: ML prediction (canonical source of truth)
         try:
             ml_result = predict_single(features_15)
-            approval_prob = ml_result["approval_probability"]
-            model_used = ml_result["model_used"]
-        except FileNotFoundError:
-            # No trained models yet — use rule-based fallback
-            approval_prob = None
-            logger.warning("No ML models found — using rule-based decision only")
+            model_used = ml_result.get("model_used", "unknown")
+            decision = ml_result["decision"]
+            raw_default_probability = ml_result["raw_default_probability"]
+            calibrated_default_probability = ml_result["calibrated_default_probability"]
+            risk_tier = ml_result["risk_tier"]
+            approval_prob = 1.0 - calibrated_default_probability
+        except Exception as e:
+            logger.error(f"Canonical ML model failed: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail={"code": "MODEL_UNAVAILABLE", "message": "Canonical risk model unavailable"}
+            )
 
-        # Step 4: Rule-based risk
-        risk_level = calculate_risk(
+        # Step 4: Rule-based risk (for heuristic/comparison only, strictly non-canonical)
+        heuristic_risk_level = calculate_risk(
             loan_data["income"],
             loan_data["loan_amount"],
             loan_data["credit_score"],
             loan_data["existing_loans"],
         )
 
-        # Step 5: Monte Carlo simulation
+        # Step 5: Monte Carlo simulation (for scenario/sensitivity only)
         mc_results = mc_simulate(
             {
                 "income": loan_data["income"],
@@ -536,45 +547,34 @@ async def analyze_application(application: LoanApplication, request: Request, us
             n_simulations=5000,
         )
 
-        # Step 5b: Extract Monte Carlo metric
-        mc_default = mc_results["default_probability"]
-
-        # Step 6: Final decision (strictly driven by canonical frozen DecisionPolicy)
-        if ml_result is not None and "decision" in ml_result:
-            decision = ml_result["decision"]
-        else:
-            if risk_level == "HIGH" or mc_default >= 0.335:
-                decision = "REJECT"
-            elif risk_level == "LOW" and mc_default <= 0.045:
-                decision = "APPROVE"
-            else:
-                decision = "MANUAL_REVIEW"
-
-        # Step 7: SHAP Explanation (if model available)
-        top_factors = []
-        plain_english = []
-        if approval_prob is not None:
-            try:
-                from shap_explainer import explain_decision
-                from ml.inference.predict import get_model
-                
-                clf = get_model(model_used)
-                explanation = explain_decision(features_15, clf, model_used)
-                
-                # Format for frontend: just the labels
+        # Step 6: SHAP Explanation
+        try:
+            from shap_explainer import explain_decision
+            from ml.inference.predict import get_model
+            
+            clf = get_model(model_used)
+            explanation = explain_decision(features_15, clf, model_used)
+            
+            explanation_status = explanation.get("explanation_status", "available")
+            if explanation_status == "available":
                 top_factors = [f["label"] for f in explanation["top_factors"][:5]]
                 plain_english = explanation["plain_english"]
-            except Exception as e:
-                logger.warning(f"SHAP explanation failed: {e}")
-                top_factors = ["Credit Score", "Income-to-Loan Ratio", "Employment History"]
-                plain_english = ["High-level assessment based on standard risk parameters."]
+            else:
+                top_factors = []
+                plain_english = []
+        except Exception as e:
+            logger.warning(f"SHAP explanation failed: {e}")
+            explanation_status = "unavailable"
+            top_factors = []
+            plain_english = []
+            explanation_error = str(e)
 
-        # Step 8: Advice
+        # Step 7: Advice
         advice = []
-        if mc_default > 0.15:
-            advice.append(f"Default risk is {mc_default:.1%} — consider reducing loan amount")
-        if risk_level == "HIGH":
-            advice.append("Risk profile is HIGH based on income-to-loan ratio")
+        if mc_results["default_probability"] > 0.15:
+            advice.append(f"Monte Carlo scenario risk is {mc_results['default_probability']:.1%} — consider reducing loan amount")
+        if heuristic_risk_level == "HIGH":
+            advice.append("Heuristic risk profile is HIGH based on income-to-loan ratio")
         if loan_data["credit_score"] < 650:
             advice.append("Credit score below 650 — improving it will significantly help")
         if enriched["emi_to_income_ratio"] > 35:
@@ -585,28 +585,33 @@ async def analyze_application(application: LoanApplication, request: Request, us
         # Compile response with calibrated model and policy metadata
         response_data = {
             "timestamp": datetime.now().isoformat(),
+            
+            # Canonical Fields
             "decision": decision,
+            "raw_default_probability": raw_default_probability,
+            "calibrated_default_probability": calibrated_default_probability,
+            "risk_tier": risk_tier,
+            
+            # Non-Canonical / Heuristic Fields
+            "heuristic_risk_level": heuristic_risk_level,
             "emi": emi,
-            "risk_level": risk_level,
-            "default_probability": mc_results["default_probability"],
-            "approval_probability": approval_prob,
+            
+            # Additional ML info
             "model_used": model_used,
-            "advice": "; ".join(advice),
+            "model_name": ml_result.get("model_name", model_used),
+            "model_version": ml_result.get("model_version", "v3.1"),
+            "calibration_method": ml_result.get("calibration_method", "isotonic"),
+            "calibration_version": ml_result.get("calibration_version", "oof-iso-v3.1"),
+            "policy_version": ml_result.get("policy_version", "v3.1-policy-v1"),
+            "decision_policy": ml_result.get("policy_metadata"),
+            "expected_economic_cost": ml_result.get("expected_economic_cost"),
+
+            # SHAP
+            "explanation_status": explanation_status,
             "top_factors": top_factors,
             "plain_english": plain_english,
             "ai_advice": False,
-
-            # Calibrated Inference & Decision Policy Metadata
-            "model_name": ml_result.get("model_name", model_used) if ml_result else model_used,
-            "model_version": ml_result.get("model_version", "v3.1") if ml_result else "v3.1",
-            "calibration_method": ml_result.get("calibration_method", "isotonic") if ml_result else "none",
-            "calibration_version": ml_result.get("calibration_version", "oof-iso-v3.1") if ml_result else "none",
-            "raw_default_probability": ml_result.get("raw_default_probability") if ml_result else None,
-            "calibrated_default_probability": ml_result.get("calibrated_default_probability") if ml_result else None,
-            "risk_tier": ml_result.get("risk_tier", risk_level) if ml_result else risk_level,
-            "policy_version": ml_result.get("policy_version", "v3.1-policy-v1") if ml_result else "none",
-            "decision_policy": ml_result.get("policy_metadata") if ml_result else None,
-            "expected_economic_cost": ml_result.get("expected_economic_cost") if ml_result else None,
+            "advice": "; ".join(advice),
 
             "feature_values": {
                 "debt_to_income_ratio": enriched["debt_to_income_ratio"],
@@ -615,7 +620,10 @@ async def analyze_application(application: LoanApplication, request: Request, us
                 "loan_burden_index": enriched["loan_burden_index"],
                 "affordability_score": enriched["affordability_score"],
             },
+            
+            # Monte Carlo Scenario Block
             "monte_carlo": {
+                "scenario_default_probability": mc_results["default_probability"],
                 "worst_case_emi": mc_results["worst_case_emi"],
                 "safe_income_threshold": mc_results["safe_income_threshold"],
                 "scenario_breakdown": mc_results["scenario_breakdown"],
@@ -623,34 +631,43 @@ async def analyze_application(application: LoanApplication, request: Request, us
             },
         }
 
-        # Persist to DB
+        # Persist to DB using canonical values where possible
         save_decision({
             "timestamp": response_data["timestamp"],
             "income": loan_data["income"],
             "loan_amount": loan_data["loan_amount"],
             "credit_score": loan_data["credit_score"],
             "decision": decision,
-            "risk_level": risk_level,
-            "default_probability": mc_results["default_probability"],
+            "risk_level": risk_tier, # Storing canonical tier in DB
+            "default_probability": calibrated_default_probability,
             "approval_probability": approval_prob,
             "emi": emi,
             "model_used": model_used,
             "advice": response_data["advice"],
             "age_band": loan_data.get("age_band"),
             "region": loan_data.get("region"),
+            "user_id": user.get("user_id") if user else None,
         })
 
-
         prediction_count += 1
-        logger.info(f"Analysis done: decision={decision}, risk={risk_level}, "
-                    f"approval_prob={approval_prob}, model={model_used}")
+        logger.info(f"Analysis done: decision={decision}, risk_tier={risk_tier}, "
+                    f"calibrated_default_prob={calibrated_default_probability}, model={model_used}")
 
         # Audit log
         log_from_request(
             request, action="PREDICT", user=user,
             target_type="application", target_id=str(prediction_count),
-            after_value={"decision": decision, "risk_level": risk_level,
-                         "default_probability": mc_default, "model_used": model_used},
+            after_value={
+                "decision": decision,
+                "risk_tier": risk_tier,
+                "raw_default_probability": raw_default_probability,
+                "calibrated_default_probability": calibrated_default_probability,
+                "model_version": ml_result.get("model_version", "v3.1"),
+                "calibration_version": ml_result.get("calibration_version", "oof-iso-v3.1"),
+                "policy_version": ml_result.get("policy_version", "v3.1-policy-v1"),
+                "expected_economic_cost": ml_result.get("expected_economic_cost"),
+                "heuristic_risk_level": heuristic_risk_level
+            },
             metadata={"income": loan_data["income"], "loan_amount": loan_data["loan_amount"],
                       "credit_score": loan_data["credit_score"]},
         )
@@ -738,9 +755,12 @@ def evaluate_policy_simulation(payload: PolicyEvaluateRequest, user: dict = Depe
 # =============================================================================
 
 @app.get("/history")
-def get_decisions_history(limit: int = Query(default=20, le=100, ge=1)):
+def get_decisions_history(limit: int = Query(default=20, le=100, ge=1), user: dict = Depends(get_current_user)):
     try:
-        history = get_history(limit)
+        if user["role"] in ["admin", "underwriter"]:
+            history = get_history(limit)
+        else:
+            history = get_history(limit, user_id=user["user_id"])
         return create_response(data=history)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve history: {str(e)}")
@@ -761,7 +781,7 @@ def delete_decision(decision_id: int, admin: dict = Depends(require_role("admin"
     
     log_action(
         action="DATA_DELETION", 
-        user_id=admin["id"], 
+        user_id=admin["user_id"], 
         metadata={"decision_id": decision_id, "reason": "GDPR/DPDP compliance"}
     )
     
@@ -911,19 +931,19 @@ async def audit_stats(user: dict = Depends(require_role("admin"))):
 class WhatIfRequest(BaseModel):
     """What-if simulation: original inputs + one or more modified fields."""
     # Original application
-    income: float = Field(..., gt=0)
-    loan_amount: float = Field(..., gt=0)
+    income: float = Field(..., gt=0, le=5000000)
+    loan_amount: float = Field(..., gt=0, le=25000000)
     interest_rate: float = Field(..., gt=0, le=50)
-    loan_term: int = Field(..., gt=0, le=30)
+    loan_term: int = Field(..., gt=0, le=50)
     credit_score: int = Field(..., ge=300, le=850)
-    existing_loans: int = Field(default=0, ge=0)
+    existing_loans: int = Field(default=0, ge=0, le=50)
     # Modified scenario
-    new_income: Optional[float] = Field(default=None, gt=0)
-    new_loan_amount: Optional[float] = Field(default=None, gt=0)
+    new_income: Optional[float] = Field(default=None, gt=0, le=5000000)
+    new_loan_amount: Optional[float] = Field(default=None, gt=0, le=25000000)
     new_interest_rate: Optional[float] = Field(default=None, gt=0, le=50)
     new_credit_score: Optional[int] = Field(default=None, ge=300, le=850)
-    new_existing_loans: Optional[int] = Field(default=None, ge=0)
-    new_loan_term: Optional[int] = Field(default=None, gt=0, le=30)
+    new_existing_loans: Optional[int] = Field(default=None, ge=0, le=50)
+    new_loan_term: Optional[int] = Field(default=None, gt=0, le=50)
 
 
 def _run_risk_pipeline(params: dict) -> dict:
@@ -933,18 +953,22 @@ def _run_risk_pipeline(params: dict) -> dict:
     enriched = engineer_features(params)
 
     features_15 = applicant_to_15_features(params)
-    ml_result = None
-    approval_prob = None
-    model_used = "none"
     try:
         ml_result = predict_single(features_15)
-        approval_prob = ml_result["approval_probability"]
-        model_used = ml_result["model_used"]
-    except FileNotFoundError:
-        pass
+        model_used = ml_result.get("model_used", "unknown")
+        decision = ml_result["decision"]
+        calibrated_default_probability = ml_result["calibrated_default_probability"]
+        approval_prob = 1.0 - calibrated_default_probability
+        risk_tier = ml_result["risk_tier"]
+    except Exception as e:
+        logger.error(f"WhatIf ML model failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "MODEL_UNAVAILABLE", "message": "Canonical risk model unavailable"}
+        )
 
-    risk_level = calculate_risk(params["income"], params["loan_amount"],
-                                params["credit_score"], params["existing_loans"])
+    heuristic_risk_level = calculate_risk(params["income"], params["loan_amount"],
+                                          params["credit_score"], params["existing_loans"])
 
     mc_results = mc_simulate({
         "income": params["income"], "loan_amount": params["loan_amount"],
@@ -953,24 +977,14 @@ def _run_risk_pipeline(params: dict) -> dict:
     }, n_simulations=3000)
 
     mc_default = mc_results["default_probability"]
-    if risk_level == "HIGH" or mc_default > 0.35:
-        decision = "REJECT"
-    elif risk_level == "LOW" and mc_default < 0.15:
-        decision = "APPROVE" if (approval_prob is None or approval_prob > 0.5) else "CONDITIONAL"
-    else:
-        decision = "CONDITIONAL"
-
-    if approval_prob is not None:
-        if approval_prob >= 0.80 and decision == "CONDITIONAL":
-            decision = "APPROVE"
-        elif approval_prob <= 0.20 and decision == "CONDITIONAL":
-            decision = "REJECT"
 
     return {
         "decision": decision,
-        "risk_level": risk_level,
-        "default_probability": mc_default,
+        "risk_level": risk_tier,
+        "heuristic_risk_level": heuristic_risk_level,
+        "default_probability": calibrated_default_probability,
         "approval_probability": approval_prob,
+        "scenario_default_probability": mc_default,
         "emi": emi,
         "model_used": model_used,
         "feature_values": {

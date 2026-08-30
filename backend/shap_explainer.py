@@ -123,6 +123,7 @@ def explain_decision(
     plain = _plain_english(factors_sorted[:5], prob)
 
     return {
+        "explanation_status":   "available",
         "decision":            "approved" if prob >= 0.5 else "rejected",
         "approval_probability": round(prob, 4),
         "base_value":           round(base_value, 4),

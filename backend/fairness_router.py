@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Router instance
-router = APIRouter(prefix="/fairness", tags=["fairness"])
+router = APIRouter(prefix="/fairness", tags=["synthetic fairness stress test"])
 
 # =============================================================================
 # Configuration
@@ -113,6 +113,112 @@ def set_cached_report(report: Dict):
     _last_audit_time = datetime.now()
 
 
+def _normalize_disk_report(report: Dict) -> Dict:
+    """
+    Transform the on-disk fairness report format (produced by
+    ml/training/fairness_audit.py) into the FairnessReportResponse schema.
+
+    On-disk keys: metadata, overall_portfolio, disparity_summary, subgroups
+    Response keys: audit_timestamp, model_name, overall_fairness_score,
+                   total_samples, group_metrics, violations, mitigations,
+                   summary, recommendations
+    """
+    metadata = report.get("metadata", {})
+    portfolio = report.get("overall_portfolio", {})
+    disparities = report.get("disparity_summary", {})
+    subgroups = report.get("subgroups", {})
+
+    # --- model_name & audit_timestamp ---
+    model_name = metadata.get("model", "unknown")
+    audit_timestamp = metadata.get("audit_timestamp", datetime.now().isoformat())
+
+    # --- total_samples ---
+    total_samples = portfolio.get("sample_size", 0)
+
+    # --- overall_fairness_score (0-100) ---
+    # Average of all disparate_impact_ratios × 100; higher = fairer.
+    di_ratios = [
+        feat.get("disparate_impact_ratio", 1.0)
+        for feat in disparities.values()
+    ]
+    overall_fairness_score = (
+        round((sum(di_ratios) / len(di_ratios)) * 100, 1)
+        if di_ratios else 0.0
+    )
+
+    # --- group_metrics: flatten subgroups ---
+    group_metrics: List[Dict[str, Any]] = []
+    for feature_name, groups in subgroups.items():
+        for group_name, stats in groups.items():
+            group_metrics.append({
+                "group_name": f"{feature_name}:{group_name}",
+                "sample_size": stats.get("sample_size", 0),
+                "approval_rate": stats.get("approval_rate", 0.0),
+                "average_credit_score": 0.0,  # not tracked in on-disk format
+                "false_positive_rate": stats.get("fpr", 0.0),
+                "false_negative_rate": stats.get("fnr", 0.0),
+            })
+
+    # --- violations: flag features failing the 4/5ths rule ---
+    violations: List[Dict[str, Any]] = []
+    FOUR_FIFTHS = 0.80
+    for feature_name, disp in disparities.items():
+        di = disp.get("disparate_impact_ratio", 1.0)
+        if di < FOUR_FIFTHS:
+            violations.append({
+                "feature": feature_name,
+                "type": "disparate_impact",
+                "severity": "high" if di < 0.70 else "medium",
+                "disparate_impact_ratio": di,
+                "highest_group": disp.get("highest_approval_group", ""),
+                "lowest_group": disp.get("lowest_approval_group", ""),
+                "message": (
+                    f"{feature_name}: disparate impact ratio {di:.4f} "
+                    f"is below the 4/5ths threshold ({FOUR_FIFTHS})"
+                ),
+            })
+
+    # --- mitigations ---
+    mitigations: List[Dict[str, Any]] = []
+    if violations:
+        mitigations.append({
+            "type": "recommendation",
+            "message": "Review features contributing to disparate impact and consider re-calibration or threshold adjustments per subgroup.",
+        })
+    else:
+        mitigations.append({
+            "type": "info",
+            "message": "All features pass the 4/5ths disparate impact threshold.",
+        })
+
+    # --- summary ---
+    n_violations = len(violations)
+    summary = (
+        f"Fairness audit on {total_samples:,} samples using {model_name}. "
+        f"Overall fairness score: {overall_fairness_score}/100. "
+        f"{n_violations} violation(s) detected across {len(disparities)} protected features."
+    )
+
+    # --- recommendations ---
+    recommendations: List[str] = []
+    if n_violations > 0:
+        recommendations.append("Investigate features with disparate impact ratio below 0.80.")
+        recommendations.append("Consider post-hoc threshold tuning per subgroup to mitigate disparities.")
+    recommendations.append("Re-run fairness audit after any model or policy change.")
+
+    return {
+        "audit_timestamp": audit_timestamp,
+        "model_name": model_name,
+        "overall_fairness_score": overall_fairness_score,
+        "total_samples": total_samples,
+        "group_metrics": group_metrics,
+        "violations": violations,
+        "mitigations": mitigations,
+        "summary": summary,
+        "recommendations": recommendations,
+    }
+
+
 # =============================================================================
 # API Endpoints
 # =============================================================================
@@ -144,9 +250,14 @@ async def get_fairness_report():
                 "type": "info",
                 "message": "No audit available. Run POST /api/fairness/run to generate."
             }],
-            summary="No fairness audit has been run yet.",
-            recommendations=["Run a fairness audit to evaluate model bias"],
+            summary="No synthetic fairness stress test has been run yet.",
+            recommendations=["Run a synthetic fairness stress test to evaluate model behavior"],
         )
+
+    # If the report is in the on-disk format (has 'metadata'/'subgroups' keys
+    # instead of 'audit_timestamp'/'model_name'), normalize it first.
+    if "metadata" in report and "audit_timestamp" not in report:
+        report = _normalize_disk_report(report)
 
     return FairnessReportResponse(**report)
 
@@ -157,7 +268,7 @@ async def run_fairness_audit(
     background_tasks: BackgroundTasks
 ):
     """
-    Trigger a new fairness audit (runs in background).
+    Trigger a new synthetic fairness stress test (runs in background).
 
     The audit evaluates model predictions across:
     - Age bands (<30, 30-45, 45-60, 60+)
@@ -289,9 +400,10 @@ async def get_group_metrics(
     report = get_cached_report()
 
     if report is None:
-        raise HTTPException(
-            status_code=404,
-            detail="No fairness report available. Run an audit first."
+        return FairnessGroupResponse(
+            groups=[],
+            reference_group="unknown",
+            disparity_summary={}
         )
 
     groups = report.get("group_metrics", [])
