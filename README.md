@@ -2,10 +2,10 @@
 
 > AI-powered mortgage default-risk analytics and underwriting decision support using OOF-calibrated LightGBM, TreeSHAP, and cost-sensitive policy routing.
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)](https://fastapi.tiangolo.com)
 [![React 18](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev)
-[![Tests Passing](https://img.shields.io/badge/pytest-89%20passed%20(100%25)-success.svg)](tests/)
+[![Tests Passing](https://img.shields.io/badge/pytest-115%20passed%20(100%25)-success.svg)](tests/)
 [![Model Status](https://img.shields.io/badge/ML%20Core-Frozen%20v3.1-orange.svg)](ml/models/)
 
 ![Mortgage AI v3.1 Hero Dashboard](docs/images/ui-dashboard.png)
@@ -27,7 +27,7 @@ Traditional mortgage underwriting often relies on uncalibrated risk scores and a
 | **Test PR-AUC** | **0.3995** [0.370, 0.430] | 6.76% default prevalence baseline |
 | **Test Weighted ECE** | **0.0012** ($0.12\%$ error) | $61.3\%$ error reduction over raw probabilities |
 | **Explainability** | TreeSHAP | Local log-odds waterfall & global feature rankings |
-| **Test Suite** | 89 / 89 Passing (100%) | End-to-end integration & mathematical unit tests |
+| **Test Suite** | 115 / 115 Passing (100%) | End-to-end integration & mathematical unit tests |
 | **Tech Stack** | FastAPI + React 18 / Vite + SQLite | Lightweight, async, production-oriented architecture |
 
 ---
@@ -222,7 +222,7 @@ cd Mortgage_AI
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Run full test suite (89 passed in ~40s)
+# Run full test suite (115 passed in ~40s)
 pytest -v
 
 # Run ML inference smoke test
