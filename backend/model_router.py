@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Optional
 import json
 import sys
-import os
+import logging
 
 from fastapi import APIRouter, HTTPException
+
 from pydantic import BaseModel, Field
 import joblib
 
@@ -22,6 +23,7 @@ from ml.inference.predict import (
 )
 
 router = APIRouter(tags=["models"])
+logger = logging.getLogger(__name__)
 
 COMPARISON_REPORT = MODELS_DIR / "comparison_report.json"
 BEST_MODEL_NAME   = MODELS_DIR / "best_model_name.txt"

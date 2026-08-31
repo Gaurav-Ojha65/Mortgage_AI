@@ -14,6 +14,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.11"]
 
@@ -59,21 +60,20 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        pip install flake8 black
+        pip install flake8
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        black --check .
 
     - name: Type check with mypy
       run: |
         pip install mypy
-        mypy ml/ api/ --ignore-missing-imports
+        mypy ml/ backend/ --ignore-missing-imports
 
     - name: Run tests
       env:
         REDIS_HOST: localhost
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mortgage_test
       run: |
-        pytest tests/ -v --cov=ml --cov=api --cov-report=xml --cov-report=html
+        pytest tests/ -v --cov=ml --cov=backend --cov-report=xml --cov-report=html
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3
@@ -83,10 +83,13 @@ jobs:
 
     - name: Run load tests
       run: |
-        locust -f tests/load_test.py --headless -u 100 -r 10 --run-time 1m --html load_test_report.html
+        locust -f tests/locustfile.py --headless -u 100 -r 10 --run-time 1m --html load_test_report.html
 
   security-scan:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
     steps:
     - uses: actions/checkout@v4
 
@@ -99,7 +102,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 

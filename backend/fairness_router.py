@@ -280,7 +280,6 @@ async def run_fairness_audit(
     logger.info(f"Starting fairness audit for {request.model_name}...")
 
     async def run_audit():
-        global _latest_report
 
         try:
             # Import here to avoid blocking imports

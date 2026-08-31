@@ -526,7 +526,7 @@ def evaluate_tiered(y_true, probs, t1, t2, label=""):
 
 def evaluate_binary(y_true, probs, threshold, label=""):
     y_hat = (probs >= threshold).astype(int)
-    auc = roc_auc_score(y_true, y_prob)
+    auc = roc_auc_score(y_true, probs)
     tn,fp,fn,tp = confusion_matrix(y_true, y_hat, labels=[0,1]).ravel()
     prec = precision_score(y_true, y_hat)
     rec  = recall_score(y_true, y_hat)
@@ -787,7 +787,7 @@ def main():
                   "Constraint: No tier deviation > 20% per group","",
                   "Per-tier analysis shows approval rate deviation across groups.","",
                   "Global thresholds: T1={:.3f} T2={:.3f}".format(t1_opt,t2_opt),"",
-                  "Results:","overall_auto_rate={:.3f}".format((tier_score==0).mean()),""]
+                  "Results:","overall_auto_rate={:.3f}".format((cal_test_r < t1_opt).mean()),""]
     for name,res in fairness_results.items():
         status = "PASS" if res['di_ratio']>=0.80 and not res['flagged_groups'] else "FAIL"
         fair_lines.append(f"  {name}: DI={res['di_ratio']:.3f} Flagged={res['flagged_groups']} [{status}]")
