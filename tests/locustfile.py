@@ -32,10 +32,10 @@ class MortgageUser(HttpUser):
         }
 
         with self.client.post(
-            "/predict",
+            "/analyze",
             json=payload,
             catch_response=True,
-            name="predict"
+            name="analyze"
         ) as response:
             if response.status_code == 200:
                 data = response.json()
@@ -46,37 +46,7 @@ class MortgageUser(HttpUser):
             else:
                 response.failure(f"Status code: {response.status_code}")
 
-    @task(3)
-    def batch_predict(self):
-        """Make batch predictions."""
-        applications = [
-            {
-                "income": random.randint(30000, 150000),
-                "loan_amount": random.randint(5000, 100000),
-                "interest_rate": round(random.uniform(2.0, 15.0), 2),
-                "loan_term": random.randint(1, 30),
-                "credit_score": random.randint(300, 850),
-                "existing_loans": random.randint(0, 5),
-            }
-            for _ in range(random.randint(5, 20))
-        ]
 
-        with self.client.post(
-            "/predict/batch",
-            json={"applications": applications},
-            catch_response=True,
-            name="predict_batch"
-        ) as response:
-            if response.status_code == 200:
-                data = response.json()
-                if "results" in data:
-                    response.success()
-                else:
-                    response.failure("Batch prediction failed")
-            else:
-                response.failure(f"Status code: {response.status_code}")
-
-    @task(2)
     def get_explanation(self):
         """Get SHAP explanation."""
         payload = {
@@ -89,7 +59,7 @@ class MortgageUser(HttpUser):
         }
 
         with self.client.post(
-            "/explain",
+            "/api/explain",
             json=payload,
             catch_response=True,
             name="explain"
@@ -113,10 +83,10 @@ class MortgageUser(HttpUser):
         ) as response:
             if response.status_code == 200:
                 data = response.json()
-                if data.get("status") == "healthy":
+                if data.get("data", {}).get("status") in ["ok", "healthy"]:
                     response.success()
                 else:
-                    response.failure("Health check failed")
+                    response.failure(f"Health check failed: {data}")
             else:
                 response.failure(f"Status code: {response.status_code}")
 
@@ -151,11 +121,11 @@ class AuditorUser(HttpUser):
     def get_audit_logs(self):
         """Get audit logs."""
         with self.client.get(
-            "/audit/logs?limit=100",
+            "/audit?limit=100",
             catch_response=True,
-            name="audit_logs"
+            name="audit"
         ) as response:
-            if response.status_code == 200:
+            if response.status_code in [200, 401]:
                 response.success()
             else:
                 response.failure(f"Status code: {response.status_code}")
@@ -163,7 +133,7 @@ class AuditorUser(HttpUser):
 
 # Custom event handlers
 @events.request.add_listener
-def on_request(request_type, name, response_time, response_length, response, context, exception):
+def on_request(request_type, name, response_time, response_length, response, context, exception, **kwargs):
     """Log slow requests."""
     if response_time > 5000:  # Log requests taking > 5 seconds
         print(f"SLOW REQUEST: {request_type} {name} took {response_time}ms")

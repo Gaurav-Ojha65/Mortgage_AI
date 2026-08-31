@@ -82,9 +82,30 @@ jobs:
         file: ./coverage.xml
         fail_ci_if_error: false
 
+    - name: Start FastAPI server
+      env:
+        REDIS_HOST: localhost
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mortgage_test
+      run: |
+        python -m uvicorn backend.run_server:app --host 127.0.0.1 --port 8001 > uvicorn.log 2>&1 &
+        echo $! > server.pid
+
+    - name: Wait for Health Check
+      run: |
+        echo "Waiting for API to start..."
+        timeout 60 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1:8001/health)" != "200" ]]; do sleep 2; done' || false
+
     - name: Run load tests
       run: |
-        locust -f tests/locustfile.py --headless -u 100 -r 10 --run-time 1m --html load_test_report.html
+        locust -f tests/locustfile.py --headless -u 100 -r 10 --run-time 1m --host=http://127.0.0.1:8001 --html load_test_report.html
+
+    - name: Stop FastAPI server
+      if: always()
+      run: |
+        if [ -f server.pid ]; then
+          kill $(cat server.pid) || true
+        fi
+        cat uvicorn.log || true
 
   security-scan:
     runs-on: ubuntu-latest
